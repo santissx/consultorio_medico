@@ -7,6 +7,7 @@
   <title>Medicos</title>
   <link rel="stylesheet" href="../css/bootstrap.min.css">
   <link rel="stylesheet" href="../views/medicos.css">
+  <script src="../functions/medicos.js"></script>
 </head>
 
 <body>
@@ -131,8 +132,8 @@
           echo "<td colspan='9'>No hay registros</td>";
           echo '<td style="white-space: nowrap;">
           <button class="editarBtn" onclick="">Editar</button>
-          <a href="../config/eliminar_medico.php?id=<?php echo $row["id_medico"]; ?>" class="eliminarBtn">Eliminar</a>
-      < /td>';
+          <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '" class="eliminarBtn" onclick="confirmacion(event)">Eliminar</a>
+          </td>';
           echo "</tr>";
         }
         //Cerrar conexión

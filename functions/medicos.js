@@ -23,3 +23,18 @@ document.addEventListener("DOMContentLoaded", function () {
         event.stopPropagation();
     });
 });
+
+
+function confirmacion(event) {
+    if (confirm("¿Quieres eliminar este registro?")) {
+        return true;
+    } else {
+        event.preventDefault();
+    }
+}
+
+
+let linkdelete = document.querySelectorAll(".eliminarBtn");
+for (var i = 0 ; i < linkdelete.length ; i++) {
+    linkdelete[i].addEventListener("click", confirmacion);
+}
