@@ -122,8 +122,8 @@
             echo "<td>" . $row["tipo_medico"] . "</td>";
             echo "<td>" . $row["especialidad"] . "</td>";
             echo '<td style="white-space: nowrap;">
-              <button class="editarBtn" onclick="">Editar</button>
-              <button class="eliminarBtn" onclick="">Eliminar</button>
+            <a href="../config/editar_medico.php?id=' . $row["id_medico"] . '" class="editarBtn">Editar</a>
+            <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '" class="eliminarBtn" onclick="confirmacion(event)">Eliminar</a>
             </td>';
             echo "</tr>";
           }
@@ -131,7 +131,7 @@
           echo "<tr>";
           echo "<td colspan='9'>No hay registros</td>";
           echo '<td style="white-space: nowrap;">
-          <button class="editarBtn" onclick="">Editar</button>
+          <a href="../config/editar_medico.php?id=' . $row["id_medico"] . '" class="editarBtn">Editar</a>
           <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '" class="eliminarBtn" onclick="confirmacion(event)">Eliminar</a>
           </td>';
           echo "</tr>";
@@ -206,6 +206,28 @@
 
   </div>
 
+  <div id="formularioEditarContainer" class="formulario-container">
+  <div class="formulario">
+    <span id="cerrarEditar" class="cerrar-formulario">&times;</span>
+    <h2>Editar Medico</h2>
+    <form class="medico-form" action="../config/editar_medico.php" method="post">
+      <input type="hidden" name="id_medico_editar" id="id_medico_editar">
+      <div class="form-grupo">
+        <label for="correo_editar">Correo:</label>
+        <input type="text" name="correo_editar" id="correo_editar" required>
+      </div>
+      <div class="form-grupo">
+        <label for="telefono_editar">Telefono:</label>
+        <input type="text" name="telefono_editar" id="telefono_editar" required>
+      </div>
+      <div class="form-grupo">
+        <label for="tipo_editar">Tipo de medico:</label>
+        <input type="text" name="tipo_editar" id="tipo_editar" required>
+      </div>
+        <input type="submit" name="editar_med" id="editar_med" class="guardar" value="Guardar Cambios">
+      </form>
+    </div>
+  </div>
 
   <script src="../js/bootstrap.bundle.min.js"></script>
   <script src="../functions/medicos.js"></script>
