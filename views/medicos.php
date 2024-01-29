@@ -79,7 +79,8 @@
 
       <tbody>
         <?php
-        include 'connection.php';
+        
+        include '../config/connection.php';
 
         $sql =  "SELECT
         medicos.id_medico,
