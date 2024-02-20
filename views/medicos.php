@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/bootstrap.min.css">
   <link rel="stylesheet" href="../views/medicos.css">
   <script src="../functions/medicos.js"></script>
+  <script src="../js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -68,7 +69,7 @@
           <th>Nombres</th>
           <th>Apellido</th>
           <th>Sexo</th>
-          <th>Fecha Nacimiento</th>
+          <th>Fecha Nacimiento (A-M-D)</th>
           <th>Telefono</th>
           <th>Correo</th>
           <th>Tipo de Medico</th>
@@ -79,17 +80,21 @@
 
       <tbody>
         <?php
-        include 'connection.php';
+        
+        include '../config/connection.php';
 
         $sql =  "SELECT
         medicos.id_medico,
         registros.nombres AS nombres,
         registros.apellidos AS apellidos,
+        personas.id_persona, -- Agrega esta línea
         personas.sexo,
         personas.fecha_nacimiento,
         datos_personales.telefonos,
         datos_personales.correo,
         medicos.tipo_medico,
+        especialidades.id_especialidad, -- Agrega esta línea
+        datos_personales.id_personal, -- Agrega esta línea
         especialidades.nombre AS especialidad
     FROM
         medicos
@@ -122,18 +127,18 @@
             echo "<td>" . $row["tipo_medico"] . "</td>";
             echo "<td>" . $row["especialidad"] . "</td>";
             echo '<td style="white-space: nowrap;">
-            <a href="../config/editar_medico.php?id=' . $row["id_medico"] . '" class="editarBtn">Editar</a>
-            <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '" class="eliminarBtn" onclick="confirmacion(event)">Eliminar</a>
+            <button data-id="' . $row["id_medico"] . '" 
+            data-id-persona="' . $row["id_persona"] . '"
+            data-id-personal="' . $row["id_personal"] . '"
+            data-id-especialidad="' . $row["id_especialidad"] . '" class="btn editarBtn btn">Editar</button>
+            <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
             </td>';
             echo "</tr>";
           }
         } else { //No hay registros ingresados
           echo "<tr>";
           echo "<td colspan='9'>No hay registros</td>";
-          echo '<td style="white-space: nowrap;">
-          <a href="../config/editar_medico.php?id=' . $row["id_medico"] . '" class="editarBtn">Editar</a>
-          <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '" class="eliminarBtn" onclick="confirmacion(event)">Eliminar</a>
-          </td>';
+         
           echo "</tr>";
         }
         //Cerrar conexión
@@ -173,7 +178,7 @@
         </div>
 
         <div class="form-grupo">
-          <label for="">Fecha Nacimiento:</label>
+          <label for="">Fecha Nacimiento :</label>
           <input type="text" name="fechaN" id="fechaN">
         </div>
 
@@ -206,31 +211,63 @@
 
   </div>
 
+  <!--FORMULARIO PARA EDITAR DATOS-->
   <div id="formularioEditarContainer" class="formulario-container">
-  <div class="formulario">
-    <span id="cerrarEditar" class="cerrar-formulario">&times;</span>
-    <h2>Editar Medico</h2>
-    <form class="medico-form" action="../config/editar_medico.php" method="post">
-      <input type="hidden" name="id_medico_editar" id="id_medico_editar">
-      <div class="form-grupo">
-        <label for="correo_editar">Correo:</label>
-        <input type="text" name="correo_editar" id="correo_editar" required>
-      </div>
-      <div class="form-grupo">
-        <label for="telefono_editar">Telefono:</label>
-        <input type="text" name="telefono_editar" id="telefono_editar" required>
-      </div>
-      <div class="form-grupo">
-        <label for="tipo_editar">Tipo de medico:</label>
-        <input type="text" name="tipo_editar" id="tipo_editar" required>
-      </div>
-        <input type="submit" name="editar_med" id="editar_med" class="guardar" value="Guardar Cambios">
-      </form>
-    </div>
-  </div>
+    <div class="formulario">
+        <span id="cerrareditar" class="cerrar-formulario">&times;</span>
+        <h2>Editar Medico</h2>
+        <form class="medico-form" action="../config/editar_medico.php" method="post">
+            <!-- Agrega estos campos ocultos con los nombres correctos -->
+            <input type="hidden" name="id_medico" id="id_medico" value="">
+            <input type="hidden" name="id_personal" id="id_personal" value="">
+            <input type="hidden" name="id_persona" id="id_persona" value="">
+            <input type="hidden" name="id_especialidad" id="id_especialidad" value="">
+        <div class="form-grupo">
+          <label for="">Nombres:</label>
+          <input type="text" name="nombre" id="nombre">
+        </div>
 
-  <script src="../js/bootstrap.bundle.min.js"></script>
-  <script src="../functions/medicos.js"></script>
+        <div class="form-grupo">
+          <label for="">Apellido:</label>
+          <input type="text" name="apellido" id="apellido">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Sexo:</label>
+          <input type="text" name="sexo" id="sexo">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Fecha Nacimiento:</label>
+          <input type="text" name="fechaN" id="fechaN">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Telefono:</label>
+          <input type="text" name="telefono" id="telefono">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Correo:</label>
+          <input type="email" name="correo" id="correo">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Tipo de Medico:</label>
+          <input type="text" name="tipo" id="tipo">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Especialidad:</label>
+          <input type="text" name="especialidad" id="especialidad">
+        </div>
+        <input type="submit" name="editar_med" id="editar_med" class="editar" value="editar">
+
+      </form>
+
+    </div>
+
+  </div>
 </body>
 
 </html>

@@ -22,19 +22,58 @@ document.addEventListener("DOMContentLoaded", function () {
     contenedorFormulario.querySelector(".formulario").addEventListener("click", function (event) {
         event.stopPropagation();
     });
-});
 
+    var botonesEditar = document.querySelectorAll(".editarBtn");
+    var contenedorFormularioEditar = document.getElementById("formularioEditarContainer");
+    var botonCerrarEditar = document.getElementById("cerrareditar");
 
-function confirmacion(event) {
-    if (confirm("¿Quieres eliminar este registro?")) {
-        return true;
-    } else {
-        event.preventDefault();
+    botonesEditar.forEach(function (boton) {
+        boton.addEventListener("click", function () {
+            contenedorFormularioEditar.style.display = "flex";
+            var idMedico = boton.getAttribute("data-id");
+            var idPersona = boton.getAttribute("data-id-persona"); 
+            var idEspecialidad = boton.getAttribute("data-id-especialidad");  // Asegúrate de usar el atributo correcto
+            var idPersonal = boton.getAttribute("data-id-personal");
+    
+            // Establecer los valores en los campos ocultos del formulario de edición
+            document.getElementById("id_medico").value = idMedico;
+            document.getElementById("id_persona").value = idPersona;
+            document.getElementById("id_especialidad").value = idEspecialidad;
+            document.getElementById("id_personal").value = idPersonal;
+            console.log("ID del Médico:", idMedico);
+            console.log("ID del personal:", idPersonal);
+            console.log("ID de la Persona:", idPersona);
+            console.log("ID de la Especialidad:", idEspecialidad);
+        });
+    });
+    
+    botonCerrarEditar.addEventListener("click", function () {
+        contenedorFormularioEditar.style.display = "none";
+    });
+
+    window.addEventListener("click", function (event) {
+        if (event.target == contenedorFormularioEditar) {
+            contenedorFormularioEditar.style.display = "none";
+        }
+    });
+
+    contenedorFormularioEditar.querySelector(".formulario").addEventListener("click", function (event) {
+        event.stopPropagation();
+    });
+
+    // Confirmación para eliminar
+    function confirmacion(event) {
+        if (!confirm("¿Quieres eliminar este registro?")) {
+            event.preventDefault();
+        }
     }
-}
 
+    let linkdelete = document.querySelectorAll(".eliminarBtn");
+    for (var i = 0; i < linkdelete.length; i++) {
+        linkdelete[i].addEventListener("click", confirmacion);
+    }
 
-let linkdelete = document.querySelectorAll(".eliminarBtn");
-for (var i = 0 ; i < linkdelete.length ; i++) {
-    linkdelete[i].addEventListener("click", confirmacion);
-}
+    // Ocultar los formularios al cargar la página
+    contenedorFormulario.style.display = "none";
+    contenedorFormularioEditar.style.display = "none";
+});

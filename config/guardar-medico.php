@@ -70,3 +70,9 @@ if (isset($_POST["guardar_med"])) {
 
 // Cerrar la conexión
 $conn->close();
+
+
+// Redirigir a medicos.php después de 2 segundos
+header("refresh:1;url=../views/medicos.php");
+exit;
+?>
