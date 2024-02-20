@@ -1,7 +1,7 @@
 <?php
 include 'connection.php';
 
-if (isset($_POST["guardar_med"])) {
+if (isset($_POST["guardar_emp"])) {
     // Obtener y validar los datos del formulario
     $nombre = $_POST["nombre"];
     $apellido = $_POST["apellido"];
@@ -9,8 +9,7 @@ if (isset($_POST["guardar_med"])) {
     $fechaN = $_POST["fechaN"];
     $telefono = $_POST["telefono"];
     $correo = $_POST["correo"];
-    $tipo = $_POST["tipo"];
-    $id_especialidad = $_POST["especialidad"];
+    $id_puesto = $_POST["puesto"];
 
     // Iniciar una transacción para asegurar la integridad de los datos
     $conn->begin_transaction();
@@ -33,24 +32,15 @@ if (isset($_POST["guardar_med"])) {
     $sql_datos_personales = "INSERT INTO datos_personales (telefonos, correo, id_persona) VALUES ('$telefono', '$correo', '$id_persona')";
     $conn->query($sql_datos_personales);
 
-    // 4. Insertar en la tabla `medicos`
-    $sql_medico = "INSERT INTO medicos (tipo_medico, id_persona) VALUES ('$tipo', '$id_persona')";
-    $conn->query($sql_medico);
+    // 4. Insertar en la tabla `empleados`
+    $sql_empleado = "INSERT INTO empleados (id_puesto, id_persona) VALUES ('$id_puesto', '$id_persona')";
+    $conn->query($sql_empleado);
 
-    // Obtener el ID generado para la tabla `medicos`
-    $id_medico = $conn->insert_id;
+    // Obtener el ID generado para la tabla `empleado`
+    $id_empleado = $conn->insert_id;
 
     
-    //6.Insertar MedicoxEspecialidad
-    $sql_medicoxespe = "INSERT INTO medicosxespecialidades (id_medico, id_especialidad) VALUES ('$id_medico', '$id_especialidad')";
-    $conn->query($sql_medicoxespe);
-
     $id_documentacion = $conn->insert_id;
-
-    //7. Insertar tabla documentacion id 
-    $sql_documentacion = "INSERT INTO documentaciones (id_documentacion) VALUES ('$id_documentacion')";
-    $conn->query($sql_documentacion);
-
 
 
     // Confirmar la transacción si todo está bien
@@ -66,6 +56,6 @@ $conn->close();
 
 
 // Redirigir a medicos.php después de 2 segundos
-header("refresh:1;url=../views/medicos.php");
+header("refresh:1;url=../views/empleados.php");
 exit;
 ?>

@@ -1,21 +1,20 @@
 <?php
 include 'connection.php';
 
-if (isset($_POST["editar_med"])) {
+if (isset($_POST["editar_emp"])) {
     // Obtener y validar los datos del formulario
-    $id_medico = $_POST["id_medico"];
-    $id_registro = $_POST["id_registro"];
+    $id_empleado = $_POST["id_empleado"];
     $id_personal = $_POST["id_personal"];
     $id_persona = $_POST["id_persona"];
-    $id_especialidad = $_POST["id_especialidad"];
+    $id_puesto = $_POST["id_puesto"];
+    $id_registro = $_POST["id_registro"];
     $nombre = $_POST["nombre"];
     $apellido = $_POST["apellido"];
     $sexo = $_POST["sexo"];
     $fechaN = $_POST["fechaN"];
     $telefono = $_POST["telefono"];
     $correo = $_POST["correo"];
-    $tipo = $_POST["tipo"];
-    $id_especialidad = $_POST["especialidad"];
+    $puesto = $_POST["puesto"];
 
     // Iniciar una transacción para asegurar la integridad de los datos
     $conn->begin_transaction();
@@ -45,21 +44,12 @@ if (isset($_POST["editar_med"])) {
     }
 
     // Actualizar la tabla `medicos`
-    $sql_medico = "UPDATE medicos SET tipo_medico='$tipo' WHERE id_medico='$id_medico'";
+    $sql_medico = "UPDATE empleados SET id_puesto='$puesto' WHERE id_puesto='$id_puesto'";
     if (!$conn->query($sql_medico)) {
         echo "Error en la actualización de medicos: " . $conn->error;
         $conn->rollback(); // Deshacer la transacción en caso de error
         exit;
     }
-
-    // Actualizar la tabla `especialidades`
-    $sql_especialidad = "UPDATE medicosxespecialidades SET id_especialidad='$id_especialidad' WHERE id_medico='$id_medico'";
-    if (!$conn->query($sql_especialidad)) {
-        echo "Error en la actualización de especialidades: " . $conn->error;
-        $conn->rollback(); // Deshacer la transacción en caso de error
-        exit;
-    }
-
     // Confirmar la transacción si todo está bien
     $conn->commit();
 
@@ -72,6 +62,6 @@ if (isset($_POST["editar_med"])) {
 $conn->close();
 
 // Redirigir a medicos.php después de 2 segundos
-header("refresh:1;url=../views/medicos.php");
+header("refresh:1;url=../views/empleados.php");
 exit;
 ?>

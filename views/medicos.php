@@ -17,34 +17,36 @@
   <div class="navegador">
     <nav class="navbar navbar-expand-lg bg-body-white">
       <div class="container-fluid">
-        <a class="navbar-brand" href="menu.html" style="color: white;"><b>MAPRIFOR</b></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <a class="navbar-brand" href="menu.php" style="color: white;"><b>MAPRIFOR</b></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="medicos.html"><b>Medicos</b></a>
+              <a class="nav-link active" aria-current="page" href="medicos.php"><b>Medicos</b></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="empleados.html"><b>Empleados</b></a>
+              <a class="nav-link" href="empleados.php"><b>Empleados</b></a>
             </li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 <b>Opciones</b>
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="cronograma.html">Cronograma Medicos</a></li>
-                <li><a class="dropdown-item" href="citas.html">Citas</a></li>
-                <li><a class="dropdown-item" href="vacaciones.html">Vacaciones</a></li>
-                <li><a class="dropdown-item" href="sustituciones.html">Sustituciones</a></li>
-                <li><a class="dropdown-item" href="medicamentos.html">Medicamentos</a></li>
-                <li><a class="dropdown-item" href="documentacion.html">Documentación</a></li>
-                <li><a class="dropdown-item" href="direcciones.html">Direcciones</a></li>
+                <li><a class="dropdown-item" href="cronograma.php">Cronograma Medicos</a></li>
+                <li><a class="dropdown-item" href="citas.php">Citas</a></li>
+                <li><a class="dropdown-item" href="vacaciones.php">Vacaciones</a></li>
+                <li><a class="dropdown-item" href="sustituciones.php">Sustituciones</a></li>
+                <li><a class="dropdown-item" href="medicamentos.php">Medicamentos</a></li>
+                <li><a class="dropdown-item" href="documentacion.php">Documentación</a></li>
+                <li><a class="dropdown-item" href="direcciones.php">Direcciones</a></li>
               </ul>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="pacientes.html"><b>Pacientes</b></a>
+              <a class="nav-link" href="pacientes.php"><b>Pacientes</b></a>
             </li>
           </ul>
           <form class="d-flex" role="search">
@@ -95,7 +97,7 @@
         especialidades.id_especialidad, -- Agrega esta línea
         datos_personales.id_personal, -- Agrega esta línea
         especialidades.nombre AS especialidad
-    FROM
+      FROM
         medicos
         INNER JOIN personas ON medicos.id_persona = personas.id_persona
         INNER JOIN datos_personales ON personas.id_persona = datos_personales.id_persona
@@ -130,7 +132,7 @@
             data-id-persona="' . $row["id_persona"] . '"
             data-id-personal="' . $row["id_personal"] . '"
             data-id-especialidad="' . $row["id_especialidad"] . '" class="btn editarBtn btn">Editar</button>
-            <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
+            <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '&id_persona=' . $row["id_persona"] . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
             </td>';
             echo "</tr>";
           }
@@ -198,7 +200,18 @@
 
         <div class="form-grupo">
           <label for="">Especialidad:</label>
-          <input type="text" name="especialidad" id="especialidad">
+          <select name="especialidad" id="especialidad">
+          <option value="1">Cardiólogo</option>
+          <option value="2">Dermatólogo</option>
+          <option value="3">Neurólogo</option>
+          <option value="4">Gastroenterólogo</option>
+          <option value="5">Pediatra</option>
+          <option value="6">Endocrinólogo</option>
+          <option value="7">Oftalmólogo</option>
+          <option value="8">Cirujano Ortopédico</option>
+          <option value="9">Psiquiatra</option>
+          <option value="10">Médico de Familia</option>
+          </select>
         </div>
 
 
@@ -218,6 +231,7 @@
         <form class="medico-form" action="../config/editar_medico.php" method="post">
             <!-- Agrega estos campos ocultos con los nombres correctos -->
             <input type="hidden" name="id_medico" id="id_medico" value="">
+            <input type="hidden" name="id_registro" id="id_registro" value="">
             <input type="hidden" name="id_personal" id="id_personal" value="">
             <input type="hidden" name="id_persona" id="id_persona" value="">
             <input type="hidden" name="id_especialidad" id="id_especialidad" value="">
@@ -258,7 +272,18 @@
 
         <div class="form-grupo">
           <label for="">Especialidad:</label>
-          <input type="text" name="especialidad" id="especialidad">
+          <select name="especialidad" id="especialidad">
+          <option value="1">Cardiólogo</option>
+          <option value="2">Dermatólogo</option>
+          <option value="3">Neurólogo</option>
+          <option value="4">Gastroenterólogo</option>
+          <option value="5">Pediatra</option>
+          <option value="6">Endocrinólogo</option>
+          <option value="7">Oftalmólogo</option>
+          <option value="8">Cirujano Ortopédico</option>
+          <option value="9">Psiquiatra</option>
+          <option value="10">Médico de Familia</option>
+          </select>
         </div>
         <input type="submit" name="editar_med" id="editar_med" class="editar" value="editar">
 
