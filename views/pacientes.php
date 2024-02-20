@@ -6,13 +6,16 @@
     <title>Document</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="pacientes.css">
+    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script src="../functions/pacientes.js"></script>
 </head>
 <body>
     <!--NAVEGADOR-->
-  <div class="navegador">
+ <!--NAVEGADOR-->
+ <div class="navegador">
     <nav class="navbar navbar-expand-lg bg-body-white">
       <div class="container-fluid">
-        <a class="navbar-brand" href="menu.html" style="color: white;"><b>MAPRIFOR</b></a>
+        <a class="navbar-brand" href="menu.php" style="color: white;"><b>MAPRIFOR</b></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -20,10 +23,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="medicos.html"><b>Medicos</b></a>
+              <a class="nav-link active" aria-current="page" href="medicos.php"><b>Medicos</b></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="empleados.html"><b>Empleados</b></a>
+              <a class="nav-link" href="empleados.php"><b>Empleados</b></a>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -31,17 +34,17 @@
                 <b>Opciones</b>
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="cronograma.html">Cronograma Medicos</a></li>
-                <li><a class="dropdown-item" href="citas.html">Citas</a></li>
-                <li><a class="dropdown-item" href="vacaciones.html">Vacaciones</a></li>
-                <li><a class="dropdown-item" href="sustituciones.html">Sustituciones</a></li>
-                <li><a class="dropdown-item" href="medicamentos.html">Medicamentos</a></li>
-                <li><a class="dropdown-item" href="documentacion.html">Documentación</a></li>
-                <li><a class="dropdown-item" href="direcciones.html">Direcciones</a></li>
+                <li><a class="dropdown-item" href="cronograma.php">Cronograma Medicos</a></li>
+                <li><a class="dropdown-item" href="citas.php">Citas</a></li>
+                <li><a class="dropdown-item" href="vacaciones.php">Vacaciones</a></li>
+                <li><a class="dropdown-item" href="sustituciones.php">Sustituciones</a></li>
+                <li><a class="dropdown-item" href="medicamentos.php">Medicamentos</a></li>
+                <li><a class="dropdown-item" href="documentacion.php">Documentación</a></li>
+                <li><a class="dropdown-item" href="direcciones.php">Direcciones</a></li>
               </ul>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="pacientes.html"><b>Pacientes</b></a>
+              <a class="nav-link" href="pacientes.php"><b>Pacientes</b></a>
             </li>
           </ul>
           <form class="d-flex" role="search">
@@ -52,6 +55,7 @@
       </div>
     </nav>
   </div>
+
 
   <!--TITULO-->
     <h2 class="titulo">PACIENTES</h2>
@@ -76,29 +80,223 @@
         </thead>
   
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Gianna Micaela</td>
-            <td>Reinoso</td>
-            <td>Masculino</td>
-            <td>06/10/2008</td>
-            <td>3704232312</td>
-            <td>gianna@gmail.com</td>
-            <td>1</td>
-            <td>El paciente se presenta con dolor abdominal y malestar general.</td>
-            <td style="white-space: nowrap;">
-              <button class="editarBtn" onclick="">Editar</button>
-              <button class="eliminarBtn" onclick="">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
+        <?php
+        include '../config/connection.php';
+
+        $sql = "SELECT
+        pacientes.id_paciente,
+        registros.nombres AS nombres,
+        registros.apellidos AS apellidos,
+        personas.id_persona,
+        personas.sexo,
+        personas.fecha_nacimiento,
+        datos_personales.telefonos,
+        datos_personales.correo,
+        datos_personales.id_personal,
+        medicos.id_medico,
+        registros.id_registro,
+        pacientes.informacion_medica
+    FROM
+        pacientes
+        INNER JOIN personas ON pacientes.id_persona = personas.id_persona
+        INNER JOIN datos_personales ON personas.id_persona = datos_personales.id_persona
+        INNER JOIN medicosxpacientes ON pacientes.id_paciente = medicosxpacientes.id_paciente
+        INNER JOIN medicos ON medicosxpacientes.id_medico = medicos.id_medico
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result = $conn->query($sql);
+
+        if ($result === false) {
+          die('Error en la consulta: ' . $conn->error);
+        }
+
+        if ($result->num_rows > 0) {
+          while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . $row["id_paciente"] . "</td>";
+            echo "<td>" . $row["nombres"] . "</td>";
+            echo "<td>" . $row["apellidos"] . "</td>";
+            echo "<td>" . $row["sexo"] . "</td>";
+            echo "<td>" . $row["fecha_nacimiento"] . "</td>";
+            echo "<td>" . $row["telefonos"] . "</td>";
+            echo "<td>" . $row["correo"] . "</td>";
+            echo "<td>" . $row["id_medico"] . "</td>"; 
+            echo "<td>" . $row["informacion_medica"] . "</td>";
+            echo '<td style="white-space: nowrap;">
+            <button data-id="' . $row["id_paciente"] . '" 
+            data-id-Medico="' . $row["id_medico"] . '"
+            data-id-persona="' . $row["id_persona"] . '"
+            data-id-registro="' . $row["id_registro"] . '"
+            data-id-personal="' . $row["id_personal"] . '" class="btn editarBtn btn">Editar</button>
+            <a href="../config/eliminar_paciente.php?id=' . $row["id_paciente"] . '&id_persona=' . $row["id_persona"] .  '&id_medico=' . $row["id_medico"] . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
+
+            </td>';
+            echo "</tr>";
+          }
+        } else {
+          echo "<tr>";
+          echo "<td colspan='9'>No hay registros</td>";
+          echo "</tr>";
+        }
+        $conn->close();
+        ?>
+      </tbody>
       </table>
   
       <div class="crud-buttons">
-        <button class="agregarBtn" onclick="">Agregar</button>
+        <button id="agregar" class="agregarBtn"> Agregar</button>
       </div>
     </div>
 
-  <script src="../js/bootstrap.bundle.min.js"></script>
+    <!--FORMULARIO PARA agregar datos-->
+    <div id="formularioContainer" class="formulario-container">
+    <div class="formulario">
+      <span id="cerrar" class="cerrar-formulario">&times;</span>
+      <h2>Registrar Paciente</h2>
+      <form class="medico-form" action="../config/guardar_pacientes.php" method="post">
+
+        <div class="form-grupo">
+          <label for="">Nombres:</label>
+          <input type="text" name="nombre" id="nombre">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Apellido:</label>
+          <input type="text" name="apellido" id="apellido">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Sexo:</label>
+          <input type="text" name="sexo" id="sexo">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Fecha Nacimiento :</label>
+          <input type="text" name="fechaN" id="fechaN">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Telefono:</label>
+          <input type="text" name="telefono" id="telefono">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Correo:</label>
+          <input type="email" name="correo" id="correo">
+        </div>
+        <div class="form-grupo">
+          <label for="">informacion_medica:</label>
+          <input type="text" name="informacion_medica" id="informacion_medica">
+        </div>
+
+        <div class="form-grupo">
+    <label for="medico">Medico Encargado:</label>
+    <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+
+        $sql_medicos = "SELECT medicos.id_medico, medicos.id_persona, registros.nombres 
+                        FROM medicos 
+                        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+                        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+        
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+          echo '<option value="' . $row_medico["id_medico"] . '">'
+          . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
+</div>
+        <input type="submit" name="guardar_pacientes" id="guardar_pacientes" class="guardar" value="Guardar">
+      </form>
+    </div>
+  </div>
+
+<!--FORMULARIO PARA EDITAR DATOS-->
+<div id="formularioEditarContainer" class="formulario-container">
+    <div class="formulario">
+        <span id="cerrareditar" class="cerrar-formulario">&times;</span>
+        <h2>Editar paciente</h2>
+        <form class="medico-form" action="../config/editar_paciente.php" method="post">
+            <!-- Agrega estos campos ocultos con los nombres correctos -->
+            <input type="hidden" name="id_paciente" id="id_paciente" value="">
+            <input type="hidden" name="id_personal" id="id_personal" value="">
+            <input type="hidden" name="id_persona" id="id_persona" value="">
+            <input type="hidden" name="id_registro" id="id_registro" value="">
+            <input type="hidden" name="id_medico" id="id_medico" value="">
+        <div class="form-grupo">
+          <label for="">Nombres:</label>
+          <input type="text" name="nombre" id="nombre">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Apellido:</label>
+          <input type="text" name="apellido" id="apellido">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Sexo:</label>
+          <input type="text" name="sexo" id="sexo">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Fecha Nacimiento:</label>
+          <input type="text" name="fechaN" id="fechaN">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Telefono:</label>
+          <input type="text" name="telefono" id="telefono">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Correo:</label>
+          <input type="email" name="correo" id="correo">
+        </div>
+        <div class="form-grupo">
+          <label for="">informacion_medica:</label>
+          <input type="text" name="informacion_medica" id="informacion_medica">
+        </div>
+        <div class="form-grupo">
+    <label for="medico">Medico Encargado:</label>
+    <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+
+        $sql_medicos = "SELECT medicos.id_medico, medicos.id_persona, registros.nombres 
+                        FROM medicos 
+                        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+                        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+        
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+          echo '<option value="' . $row_medico["id_medico"] . '">'
+          . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+        </select>
+        </div>
+        <input type="submit" name="editar_pac" id="editar_pac" class="editar" value="editar">
+
+      </form>
+
+    </div>
+
+  </div>
 </body>
 </html>

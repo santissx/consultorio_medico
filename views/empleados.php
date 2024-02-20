@@ -142,7 +142,7 @@
         <button id="agregar" class="agregarBtn"> Agregar</button>
       </div>
     </div>
-
+ <!--FORMULARIO PARA agregar datos-->
     <div id="formularioContainer" class="formulario-container">
     <div class="formulario">
       <span id="cerrar" class="cerrar-formulario">&times;</span>
