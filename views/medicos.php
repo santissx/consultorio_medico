@@ -80,7 +80,11 @@
 
       <tbody>
         <?php
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> ae8799872a3c6bb35a02632eed379aefe7f7d4f9
         include '../config/connection.php';
 
         $sql =  "SELECT
