@@ -131,7 +131,7 @@
             <button data-id="' . $row["id_medico"] . '" 
             data-id-persona="' . $row["id_persona"] . '"
             data-id-personal="' . $row["id_personal"] . '"
-            data-id-especialidad="' . $row["id_especialidad"] . '" class="btn editarBtn btn">Editar</button>
+            data-id-especialidad="' . $row["id_especialidad"] . '" class="btn editarBtn">Editar</button>
             <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '&id_persona=' . $row["id_persona"] . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
             </td>';
             echo "</tr>";

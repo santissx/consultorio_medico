@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Scraping de Carrefour</title>
+</head>
+<body>
+    <h1>Productos de Carrefour</h1>
+    <div id="product-list"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cheerio"></script>
+
+    <script>
+        async function scrapeCarrefourProducts(url) {
+            try {
+                const response = await axios.get(url);
+                const $ = cheerio.load(response.data);
+                const productList = $('#product-list');
+
+                $('.valtech-carrefourar-search-result-0-x-galleryItem').each((index, element) => {
+                    const productName = $(element).find('.vtex-product-summary-2-x-productBrand').text().trim();
+                    const productLink = $(element).find('.vtex-product-summary-2-x-clearLink').attr('href');
+                    const productUrl = `https://www.carrefour.com.ar${productLink}`;
+                    let productImage = $(element).find('.vtex-product-summary-2-x-image').attr('src');
+
+                    // Verificar si la URL de la imagen es relativa
+                    if (productImage && !productImage.startsWith('http')) {
+                        productImage = `https://www.carrefour.com.ar${productImage}`;
+                    }
+
+                    const productHTML = `
+                        <div>
+                            <h3>${productName}</h3>
+                            <p><a href="${productUrl}" target="_blank">Enlace al producto</a></p>
+                            <img src="${productImage}" alt="${productName}">
+                        </div>
+                    `;
+
+                    productList.append(productHTML);
+                });
+            } catch (error) {
+                console.error("Error al obtener los datos:", error);
+            }
+        }
+
+        const url = "https://www.carrefour.com.ar/Almacen/Aceites-y-vinagres";
+        scrapeCarrefourProducts(url);
+    </script>
+</body>
+</html>

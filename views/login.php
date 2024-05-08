@@ -26,7 +26,7 @@
     <input type="text" name="contraseña" class="controls" id="contraseña">
 
     <input type="submit" value="Ingresar" class="boton" name="login" id="login">
-    <p class="registro"><a href="registro.html">Clik aquí para registrarte</a></p>
+    <p class="registro"><a href="registro.php">Clik aquí para registrarte</a></p>
     
     </div>
     </form>
