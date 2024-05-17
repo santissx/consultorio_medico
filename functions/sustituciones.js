@@ -30,26 +30,10 @@ document.addEventListener("DOMContentLoaded", function () {
     botonesEditar.forEach(function (boton) {
         boton.addEventListener("click", function () {
             contenedorFormularioEditar.style.display = "flex";
-            var idPaciente = boton.getAttribute("data-id");
-            var idPersona = boton.getAttribute("data-id-persona"); 
-            var idMedico = boton.getAttribute("data-id-Medico");  // Asegúrate de usar el atributo correcto
-            var idPersonal = boton.getAttribute("data-id-personal");
-            var idregistro = boton.getAttribute("data-id-registro");
-            var iddocumento = boton.getAttribute("data-id-documento");
-    
+            var idsustituciones = boton.getAttribute("data-id");
             // Establecer los valores en los campos ocultos del formulario de edición
-            document.getElementById("id_paciente").value = idPaciente;
-            document.getElementById("id_persona").value = idPersona;
-            document.getElementById("id_medico").value = idMedico;
-            document.getElementById("id_personal").value = idPersonal;
-            document.getElementById("id_registro").value = idregistro;
-            document.getElementById("id_documentacion").value = iddocumentacion;
-            document.getElementById("id_documento").value = iddocumento;
-            console.log("ID del Paciente:", idPaciente);
-            console.log("ID del personal:", idPersonal);
-            console.log("ID de la Persona:", idPersona);
-            console.log("ID de la Medico:", idMedico);
-            console.log("ID del registro:", idregistro);
+            document.getElementById("id_sustitucion").value = idsustituciones;
+            console.log("ID de la sustitucion es:", idsustituciones);
         });
     });
     

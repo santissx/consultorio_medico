@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,7 +102,7 @@
         <?php
         include '../config/connection.php';
 
-        $sql =  "SELECT * from medicamentos";
+        $sql =  "SELECT * from medicamentos where activo='1'";
         $result = $conn->query($sql);
 
         if ($result === false) {
@@ -112,7 +122,7 @@
             echo "<td>" . $row["ingrediente_activo"] . "</td>";
             echo '<td style="white-space: nowrap;">
             <button data-id="' . $row["id_medicamento"] . '" class="btn editarBtn btn editarM">Editar</button>
-            <a href="../config/eliminar_medico.php?id=' . $row["id_medicamento"] . '" class="eliminarBtn btn eliminarM" onclick="confirmacion(event)">Eliminar</a>
+            <a href="../config/eliminar_medicamento.php?id=' . $row["id_medicamento"] . '" class="eliminarBtn btn eliminarM" onclick="confirmacion(event)">Eliminar</a>
             </td>';
             echo "</tr>";
           }
@@ -133,8 +143,7 @@
             </div>
         </div>
     </div>
-
-    <!--FORMULARIO PARA AGREGAR DATOS-->
+     <!--FORMULARIO PARA AGREGAR DATOS-->
 <div id="formularioContainerM" class="formulario-container">
     <div class="formulario">
       <span id="cerrarM" class="cerrar-formulario">&times;</span>
@@ -155,15 +164,47 @@
           <label for="">ingrediente_activo:</label>
           <input type="text" name="ingrediente" id="ingrediente">
         </div>
+        <div class="form-grupo">
+    <input type="hidden" name="activo" id="activo" value="1">
+    </div>
 
         <input type="submit" name="guardar-medicamento" id="guardar-medicamento" class="guardarM" value="Guardar">
 
       </form>
 
-</div>
+  </div>
 
 </div>
 
+<!--FORMULARIO PARA EDITAR DATOS-->
+<div id="formularioEditarContainerM" class="formulario-container">
+    <div class="formulario">
+        <span id="cerrareditarM" class="cerrar-formulario">&times;</span>
+        <h2>Editar Medicamento</h2>
+        <form class="medico-form" action="../config/editar_medicamento.php" method="post">
+            <!-- Agrega estos campos ocultos con los nombres correctos -->
+            <input type="hidden" name="id_medicamento" id="id_medicamento" value="">
+            <div class="form-grupo">
+          <label for="">Nombres:</label>
+          <input type="text" name="nombreEditar" id="nombreEditar">
+        </div>
+        <div class="form-grupo">
+          <label for="">Descripcion:</label>
+          <input type="text" name="descripEditar" id="descripEditar">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">ingrediente activo:</label>
+          <input type="text" name="ingredienteEditar" id="ingredienteEditar">
+        </div>
+        <input type="submit" name="editar_med" id="editar_med" class="editar" value="editar">
+
+      </form>
+
+    </div>
+
+  </div>
+   
 
     <div id="table-prescripcion" class="table-container">
 
@@ -203,7 +244,9 @@
         INNER JOIN pacientes ON prescripciones.id_paciente = pacientes.id_paciente
         INNER JOIN personas ON pacientes.id_persona = personas.id_persona
         INNER JOIN registros ON personas.id_registro = registros.id_registro";
-
+      
+ 
+       
         $result = $conn->query($sql);
 
         if ($result === false) {
@@ -221,14 +264,14 @@
             echo "<td>" . $row["id_prescripcion"] . "</td>";
             echo "<td>" . $row["fecha_prescripcion"] . "</td>";
             echo "<td>" . $row["nombre_medicamento"] . "</td>";
-            echo "<td>" . $row["medico_nombre"] .  "</td>";
+            echo "<td>" . $row["id_medico"] .  "</td>";
             echo "<td>" . $row["nombres_paciente"] . ' '. $row["apellidos_paciente"] ."</td>";
             echo '<td style="white-space: nowrap;">
             <button data-id="' . $row["id_prescripcion"] . '" 
-            data-id-persona="' . $row["id_medico"] .  '"
-            data-id-personal="' . $row["id_paciente"] . '"
-            data-id-especialidad="' . $row["id_medicamento"] . '" class="btn editarBtn editarP">Editar</button>
-            <a href="../config/eliminar_prescipcion.php?id=' . $row["id_prescripcion"] . '" class="eliminarBtn btn eliminarM" onclick="confirmacion(event)">Eliminar</a>
+            data-id-medico="' . $row["id_medico"] .  '"
+            data-id-paciente="' . $row["id_paciente"] . '"
+            data-id-medicamento="' . $row["id_medicamento"] . '" class="btn editarBtn editarP">Editar</button>
+            <a href="../config/eliminar_medicamento.php?id_prescripcion=' . $row["id_prescripcion"] . '" class="eliminarBtn btn eliminarM" onclick="confirmacion(event)">Eliminar</a>
             </td>';
             echo "</tr>";
           }
@@ -339,6 +382,7 @@
         ?>
          </select>
     </div>
+
     <div class="form-grupo">
                 <input type="submit" name="guardar_prescripcion" id="guardar_prescripcion" class="guardarP" value="Guardar">
             </div>
@@ -346,9 +390,106 @@
 
 </div>
 
-
 </div>
 
- 
+ <!--FORMULARIO PARA EDITAR DATOS-->
+<div id="formularioEditarContainerP" class="formulario-container">
+    <div class="formulario">
+        <span id="cerrareditarP" class="cerrar-formulario">&times;</span>
+        <h2>Editar prescripcion</h2>
+        <form class="medico-form" action="../config/editar_medicamento.php" method="post">
+            <!-- Agrega estos campos ocultos con los nombres correctos -->
+            <input type="hidden" name="id_prescripcion" id="id_prescripcion" value="">
+            <div class="form-grupo">
+          <label for="">Fecha de prescripcion:</label>
+          <input type="date" name="fechaEditar" id="fechaEditar">
+        </div>
+       <div class="form-grupo">
+          <label for="">medicamento:</label>
+          <select name="id_medicamento" id="id_medicamento">
+          <?php
+        include '../config/connection.php';
+
+        $sql_medicamentos = "SELECT medicamentos.id_medicamento, medicamentos.nombre FROM medicamentos";
+
+        $result_medicamento = $conn->query($sql_medicamentos);
+
+        if ($result_medicamento === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medicamento = $result_medicamento->fetch_assoc()) {
+            echo '<option value="' . $row_medicamento["id_medicamento"] . '">'
+                . $row_medicamento["nombre"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+         </select>
+    </div>
+    <div class="form-grupo">
+    <label for="">medico encargado:</label>
+    <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+
+        $sql_medicos = "SELECT medicos.id_medico, registros.nombres, registros.apellidos
+        FROM medicos 
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+            echo '<option value="' . $row_medico["id_medico"] . '">'
+                . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
+</div>
+<div class="form-grupo">
+          <label for="">paciente recetado:</label>
+          <select name="id_paciente" id="id_paciente">
+          <?php
+        include '../config/connection.php';
+
+        $sql_paciente = "SELECT pacientes.id_paciente, registros.nombres, registros.apellidos
+        FROM pacientes
+        INNER JOIN personas ON pacientes.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_paciente = $conn->query($sql_paciente);
+
+        if ($result_paciente === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_pacientes = $result_paciente->fetch_assoc()) {
+            echo '<option value="' . $row_pacientes["id_paciente"] . '">'
+                . $row_pacientes["nombres"] . ' ' . $row_pacientes["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+         </select>
+    </div>
+
+    
+
+        <input type="submit" name="editar_pres" id="editar_pres" class="editar" value="editar">
+
+      </form>
+
+    </div>
+
+  </div>
+
+
 </body>
 </html>

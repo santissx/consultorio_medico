@@ -10,6 +10,8 @@ if (isset($_POST["guardar_emp"])) {
     $telefono = $_POST["telefono"];
     $correo = $_POST["correo"];
     $id_puesto = $_POST["puesto"];
+    $dni = $_POST["dni"];
+    $tipo = $_POST["tipo_doc"];
 
     // Iniciar una transacción para asegurar la integridad de los datos
     $conn->begin_transaction();
@@ -20,9 +22,15 @@ if (isset($_POST["guardar_emp"])) {
 
     // Obtener el ID generado para la tabla `registros`
     $id_registro = $conn->insert_id;
+    // 2. Insertar en la tabla `documentaciones`
+    $sql_documentacion = "INSERT INTO documentaciones (id_tipos_documentos ,dni) VALUES ('$tipo','$dni')";
+    $conn->query($sql_documentacion);
 
-    // 2. Insertar en la tabla `personas`
-    $sql_persona = "INSERT INTO personas (sexo, fecha_nacimiento, id_registro) VALUES ('$sexo', '$fechaN', '$id_registro')";
+    // Obtener el ID generado para la tabla `documentaciones`
+    $id_documentacion = $conn->insert_id;
+
+    // 3. Insertar en la tabla `personas` utilizando los IDs de registro y documentación
+    $sql_persona = "INSERT INTO personas (sexo, fecha_nacimiento, id_registro, id_documentacion) VALUES ('$sexo', '$fechaN', '$id_registro', '$id_documentacion')";
     $conn->query($sql_persona);
 
     // Obtener el ID generado para la tabla `personas`
@@ -49,7 +57,7 @@ if (isset($_POST["guardar_emp"])) {
     echo '<script>alert("Registro insertado correctamente");</script>';
 } else {
     echo '<script>alert("Error en la solicitud");</script>';
-}
+} 
 
 // Cerrar la conexión
 $conn->close();

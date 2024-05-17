@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -76,76 +86,79 @@
           <th>Correo</th>
           <th>Tipo de Medico</th>
           <th>Especialidades</th>
+          <th>Numero Colegiado</th>
           <th>Acciones</th>
         </tr>
       </thead>
 
       <tbody>
-        <?php
-        include '../config/connection.php';
+      <?php
+include '../config/connection.php';
 
-        $sql =  "SELECT
+$sql = "SELECT
         medicos.id_medico,
+        medicos.nro_colegiado,
+        tipos_medicos.id_tipo,
+        tipos_medicos.tipo_medico,
         registros.nombres AS nombres,
         registros.apellidos AS apellidos,
-        personas.id_persona, -- Agrega esta línea
+        personas.id_persona,
         personas.sexo,
         personas.fecha_nacimiento,
         datos_personales.telefonos,
         datos_personales.correo,
-        medicos.tipo_medico,
-        especialidades.id_especialidad, -- Agrega esta línea
-        datos_personales.id_personal, -- Agrega esta línea
+        especialidades.id_especialidad,
+        datos_personales.id_personal,
         especialidades.nombre AS especialidad
+        
       FROM
         medicos
         INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN tipos_medicos ON medicos.id_tipo = tipos_medicos.id_tipo
         INNER JOIN datos_personales ON personas.id_persona = datos_personales.id_persona
         INNER JOIN medicosXespecialidades ON medicos.id_medico = medicosXespecialidades.id_medico
         INNER JOIN especialidades ON medicosXespecialidades.id_especialidad = especialidades.id_especialidad
         INNER JOIN registros ON personas.id_registro = registros.id_registro";
 
-        $result = $conn->query($sql);
-
-        if ($result === false) {
-          die('Error en la consulta: ' . $conn->error);
-        }
-
-        if ($result->num_rows > 0) {
+$result = $conn->query($sql);
+if ($result === false) {
+  die('Error en la consulta: ' . $conn->error);
+}
 
 
-          while ($row = $result->fetch_assoc()) {
-
-            //Registrar los datos
-            echo "<tr>";
-            echo "<td>" . $row["id_medico"] . "</td>";
-            echo "<td>" . $row["nombres"] . "</td>";
-            echo "<td>" . $row["apellidos"] . "</td>";
-            echo "<td>" . $row["sexo"] . "</td>";
-            echo "<td>" . $row["fecha_nacimiento"] . "</td>";
-            echo "<td>" . $row["telefonos"] . "</td>";
-            echo "<td>" . $row["correo"] . "</td>";
-            echo "<td>" . $row["tipo_medico"] . "</td>";
-            echo "<td>" . $row["especialidad"] . "</td>";
-            echo '<td style="white-space: nowrap;">
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        //Registrar los datos
+        echo "<tr>";
+        echo "<td>" . $row["id_medico"] . "</td>";
+        echo "<td>" . $row["nombres"] . "</td>";
+        echo "<td>" . $row["apellidos"] . "</td>";
+        echo "<td>" . $row["sexo"] . "</td>";
+        echo "<td>" . $row["fecha_nacimiento"] . "</td>";
+        echo "<td>" . $row["telefonos"] . "</td>";
+        echo "<td>" . $row["correo"] . "</td>";
+        echo "<td>" . $row["tipo_medico"] . "</td>";
+        echo "<td>" . $row["especialidad"] . "</td>";
+        echo "<td>" . $row["nro_colegiado"] . "</td>";
+        echo '<td style="white-space: nowrap;">
             <button data-id="' . $row["id_medico"] . '" 
+            data-id-tipo="' . $row["id_tipo"] . '" 
             data-id-persona="' . $row["id_persona"] . '"
             data-id-personal="' . $row["id_personal"] . '"
             data-id-especialidad="' . $row["id_especialidad"] . '" class="btn editarBtn">Editar</button>
             <a href="../config/eliminar_medico.php?id=' . $row["id_medico"] . '&id_persona=' . $row["id_persona"] . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
             </td>';
-            echo "</tr>";
-          }
-        } else { //No hay registros ingresados
-          echo "<tr>";
-          echo "<td colspan='9'>No hay registros</td>";
-         
-          echo "</tr>";
-        }
-        //Cerrar conexión
-        $conn->close();
+        echo "</tr>";
+    }
+} else { //No hay registros ingresados
+    echo "<tr>";
+    echo "<td colspan='9'>No hay registros</td>";
+    echo "</tr>";
+}
 
-        ?>
+//Cerrar conexión
+$conn->close();
+?>
       </tbody>
     </table>
 
@@ -179,6 +192,35 @@
         </div>
 
         <div class="form-grupo">
+          <label for="">tipo de documento:</label>
+          <select name="tipo_doc" id="tipo_doc">
+        <?php
+        include '../config/connection.php';
+
+        $sql_tipos = "SELECT * FROM tipos_documentos";
+        $result_tipos = $conn->query($sql_tipos);
+
+        if ($result_tipos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_tipo = $result_tipos->fetch_assoc()) {
+            echo '<option value="' . $row_tipo["id_documento"] . '">'
+            . $row_tipo["tipo_documento"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+        </select>
+        </div>
+
+        <div class="form-grupo">
+          <label for="">N° DNI:</label>
+          <input type="int" name="dni" id="dni" placeholder="inserte solo numeros">
+        </div>
+
+
+        <div class="form-grupo">
           <label for="">Fecha Nacimiento :</label>
           <input type="text" name="fechaN" id="fechaN">
         </div>
@@ -194,8 +236,12 @@
         </div>
 
         <div class="form-grupo">
-          <label for="">Tipo de Medico:</label>
-          <input type="text" name="tipo" id="tipo">
+          <label for="">tipo de medico:</label>
+          <select name="tipo_medico" id="tipo_medico">
+          <option value="1">Titular</option>
+          <option value="2">Suplente</option>
+          <option value="3">Interino</option>
+          </select>
         </div>
 
         <div class="form-grupo">
@@ -212,6 +258,10 @@
           <option value="9">Psiquiatra</option>
           <option value="10">Médico de Familia</option>
           </select>
+        </div>
+        <div class="form-grupo">
+          <label for="">N° Colegiado:</label>
+          <input type="int" name="num_col" id="num_col" placeholder="inserte solo numeros">
         </div>
 
 
@@ -230,6 +280,7 @@
         <h2>Editar Medico</h2>
         <form class="medico-form" action="../config/editar_medico.php" method="post">
             <!-- Agrega estos campos ocultos con los nombres correctos -->
+            <input type="hidden" name="id_documentacion" id="id_documentacion" value="">
             <input type="hidden" name="id_medico" id="id_medico" value="">
             <input type="hidden" name="id_registro" id="id_registro" value="">
             <input type="hidden" name="id_personal" id="id_personal" value="">
@@ -249,10 +300,10 @@
           <label for="">Sexo:</label>
           <input type="text" name="sexo" id="sexo">
         </div>
-
+       
         <div class="form-grupo">
           <label for="">Fecha Nacimiento:</label>
-          <input type="text" name="fechaN" id="fechaN">
+          <input type="date" name="fechaN" id="fechaN">
         </div>
 
         <div class="form-grupo">
@@ -266,8 +317,12 @@
         </div>
 
         <div class="form-grupo">
-          <label for="">Tipo de Medico:</label>
-          <input type="text" name="tipo" id="tipo">
+          <label for="">tipo de medico:</label>
+          <select name="tipo_medico" id="tipo_medico">
+          <option value="1">Titular</option>
+          <option value="2">Suplente</option>
+          <option value="3">Interino</option>
+          </select>
         </div>
 
         <div class="form-grupo">

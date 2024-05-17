@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +17,9 @@
     <title>Documentación</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="documentacion.css">
+    
+    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script src="../functions/documentacion.js"></script>
 </head>
 
 <body>
@@ -67,9 +80,6 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#"  onclick="mostrarTabla('table-empleados',event)">Empleados</a>
-        <li class="nav-item">
-            <a class="nav-link " href="#" onclick="mostrarTabla('table-pacientes', event)">Pacientes</a>
-        </li>
     </ul>
 
     <!--TABLAS-->
@@ -88,35 +98,162 @@
                         <th>DNI</th>
                         <th>NIF</th>
                         <th>NSS</th>
-                        <th>Número Colegiado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>Luana Magali</td>
-                        <td>Gon</td>
-                        <td>DNI</td>
-                        <td>41351343</td>
-                        <td>20413513430</td>
-                        <td>913423123425</td>
-                        <td>MED-2524</td>
-                        <td style="white-space: nowrap;">
-                            <button class="editarBtn" onclick="">Editar</button>
-                            <button class="eliminarBtn" onclick="">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                   
+                   <?php
+                   include '../config/connection.php';
+           
+                   
+                   $sql = "SELECT
+                   medicos.id_medico,
+                   documentaciones.id_documentacion,
+                   documentaciones.dni,
+                   documentaciones.nif,
+                   documentaciones.nro_seguridad_social,
+                   tipos_documentos.id_documento,
+                   tipos_documentos.tipo_documento,
+                   personas.id_persona,
+                   registros.nombres AS medico_nombre,
+                   registros.apellidos AS medico_apellido
+                   FROM
+                   medicos
+                   INNER JOIN personas ON medicos.id_persona = personas.id_persona
+                   INNER JOIN documentaciones ON personas.id_documentacion = documentaciones.id_documentacion
+                   inner join tipos_documentos on documentaciones.id_tipos_documentos = tipos_documentos.id_documento
+                   INNER JOIN registros ON personas.id_registro = registros.id_registro";
+        
+                      $result = $conn->query($sql);
+              
+                      if ($result === false) {
+                        die('Error en la consulta: ' . $conn->error);
+                      }
+              
+                      if ($result->num_rows > 0) {
+              
+              
+                        while ($row = $result->fetch_assoc()) {
+              
+                          //Registrar los datos 
+                          echo "<tr>";
+                          echo "<td>" . $row["id_documentacion"] . "</td>";
+                          echo "<td>" . $row["id_medico"] . "</td>";
+                          echo "<td>" . $row["medico_nombre"] . "</td>";
+                          echo "<td>" . $row["medico_apellido"] . "</td>";
+                          echo "<td>" . $row["tipo_documento"] . "</td>";
+                          echo "<td>" . $row["dni"] . "</td>";
+                          echo "<td>" . $row["nif"] . "</td>";
+                          echo "<td>" . $row["nro_seguridad_social"] . "</td>";
+                          echo '<td style="white-space: nowrap;">
+                          <button data-id="' . $row["id_documentacion"] . '" class="btn editarBtn btn editarM">Editar</button>
+                          <a href="../config/eliminar_documentacion.php?id=' . $row["id_documentacion"] . '" class="eliminarBtn btn eliminarM" onclick="confirmacion(event)">Eliminar</a>
+                          </td>';
+                          echo "</tr>";
+                        
+                     }
+                   } else { //No hay registros ingresados
+                     echo "<tr>";
+                     echo "<td colspan='9'>No hay registros</td>";
+                    
+                     echo "</tr>";
+                   }
+                   //Cerrar conexión
+                   $conn->close();
+           
+                   ?>
+                 </tbody>
+               </table>
+                       <div class="crud-buttons">
+                           <button id="agregarM" class="agregarBtn">Agregar</button>
+                       </div>
+                   </div>
+               </div>
 
-            <div class="crud-buttons">
-                <button id="agregar" class="agregarBtn">Agregar</button>
-            </div>
+
+                <!-- Formulario editar -->
+                        
+ <div id="formularioEditarContainerM" class="formulario-container">
+    <div class="formulario">
+        <span id="cerrareditarM" class="cerrar-formulario">&times;</span>
+        <h2>Editar documentacion Medico</h2>
+        <form class="medico-form" action="../config/editar_documentacion.php" method="post">
+            <input type="hidden" name="id_documentacion" id="id_documentacion" value="">
+            <div class="form-grupo">
+        <label for="">id y nombre del medico:</label>
+          <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+        echo '<option value=""></option>';
+        $sql_medicos = "SELECT medicos.id_medico, registros.nombres, registros.apellidos
+        FROM medicos 
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+            echo '<option value="' . $row_medico["id_medico"] . '">'
+                . $row_medico["id_medico"] . ' - ' . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
         </div>
+
+        <div class="form-grupo">
+          <label for="">tipo de documento:</label>
+          <select name="tipo_doc" id="tipo_doc">
+        <?php
+        include '../config/connection.php';
+
+        $sql_tipos = "SELECT * FROM tipos_documentos";
+        $result_tipos = $conn->query($sql_tipos);
+
+        if ($result_tipos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_tipo = $result_tipos->fetch_assoc()) {
+            echo '<option value="' . $row_tipo["id_documento"] . '">'
+            . $row_tipo["tipo_documento"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+        </select>
+        </div>
+
+        <div class="form-grupo">
+          <label for="">N° DNI:</label>
+          <input type="int" name="dni" id="dni" placeholder="inserte solo numeros">
+        </div>
+        
+        <div class="form-grupo">
+          <label for="">N° NIF:</label>
+          <input type="int" name="nif" id="nif" placeholder="inserte solo numeros">
+        </div>
+        <div class="form-grupo">
+          <label for="">N° NSS:</label>
+          <input type="int" name="nss" id="nss" placeholder="inserte solo numeros">
+        </div>
+      </div>
+
+        <input type="submit" name="editar_vac_M" id="editar_vac_M" class="editar" value="editar">
+
+      </form>
+
     </div>
+    
+
+  </div>
 
 
 
@@ -131,7 +268,6 @@
                         <th>id del empleado</th>
                         <th>Nombres</th>
                         <th>Apellidos</th>
-                        <th>Puesto de Trabajo</th>
                         <th>Tipo de Documento</th>
                         <th>DNI</th>
                         <th>NIF</th>
@@ -141,79 +277,155 @@
                 </thead>
 
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>Enzo Exequiel</td>
-                        <td>Reinoso</td>
-                        <td>Aux. Enfermeria</td>
-                        <td>Pasaporte</td>
-                        <td>41351343</td>
-                        <td>20413513430</td>
-                        <td>20134534261</td>
-                        <td style="white-space: nowrap;">
-                            <button class="editarBtn" onclick="">Editar</button>
-                            <button class="eliminarBtn" onclick="">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                   
+                   <?php
+                   include '../config/connection.php';
+           
+                   
+                 $sql = "SELECT
+                empleados.id_empleado,
+                documentaciones.id_documentacion,
+                documentaciones.dni,
+                documentaciones.nif,
+                documentaciones.nro_seguridad_social,
+                tipos_documentos.id_documento,
+                tipos_documentos.tipo_documento,
+                personas.id_persona,
+                registros.nombres AS empleado_nombre,
+                registros.apellidos AS empleado_apellido
+                FROM
+                empleados
+                INNER JOIN personas ON empleados.id_persona = personas.id_persona
+                INNER JOIN documentaciones ON personas.id_documentacion = documentaciones.id_documentacion
+                inner join tipos_documentos on documentaciones.id_tipos_documentos = tipos_documentos.id_documento
+                INNER JOIN registros ON personas.id_registro = registros.id_registro";
+     
+                   $result = $conn->query($sql);
+           
+                   if ($result === false) {
+                     die('Error en la consulta: ' . $conn->error);
+                   }
+           
+                   if ($result->num_rows > 0) {
+           
+           
+                     while ($row = $result->fetch_assoc()) {
+           
+                       //Registrar los datos 
+                       echo "<tr>";
+                       echo "<td>" . $row["id_documentacion"] . "</td>";
+                       echo "<td>" . $row["id_empleado"] . "</td>";
+                       echo "<td>" . $row["empleado_nombre"] . "</td>";
+                       echo "<td>" . $row["empleado_apellido"] . "</td>";
+                       echo "<td>" . $row["tipo_documento"] . "</td>";
+                       echo "<td>" . $row["dni"] . "</td>";
+                       echo "<td>" . $row["nif"] . "</td>";
+                       echo "<td>" . $row["nro_seguridad_social"] . "</td>";
+                       echo '<td style="white-space: nowrap;">
+                       <button data-id="' . $row["id_documentacion"] . '" class="btn editarBtn btn editarM">Editar</button>
+                       <a href="../config/eliminar_documentacion.php?id=' . $row["id_documentacion"] . '" class="eliminarBtn btn eliminarM" onclick="confirmacion(event)">Eliminar</a>
+                       </td>';
+                       echo "</tr>";
+                     }
+                   } else { //No hay registros ingresados
+                     echo "<tr>";
+                     echo "<td colspan='9'>No hay registros</td>";
+                    
+                     echo "</tr>";
+                   }
+                   //Cerrar conexión
+                   $conn->close();
+           
+                   ?>
+                 </tbody>
+               </table>
+                       <div class="crud-buttons">
+                           <button id="agregarM" class="agregarBtn">Agregar</button>
+                       </div>
+                   </div>
+               </div>
 
-            <div class="crud-buttons">
-                <button id="agregar" class="agregarBtn">Agregar</button>
-            </div>
+
+                <!-- Formulario editar -->
+                        
+ <div id="formularioEditarContainerE" class="formulario-container">
+    <div class="formulario">
+        <span id="cerrareditarE" class="cerrar-formulario">&times;</span>
+        <h2>Editar documentacion</h2>
+        <form class="medico-form" action="../config/editar_documentacion.php" method="post">
+            <input type="hidden" name="id_documentacion" id="id_documentacion" value="">
+            <div class="form-grupo">
+        <label for="">id y nombre del empleado:</label>
+          <select name="id_empleado" id="id_empleado">
+        <?php
+        include '../config/connection.php';
+        echo '<option value=""></option>';
+        $sql_empleados = "SELECT empleados.id_empleado, registros.nombres, registros.apellidos
+        FROM empleados 
+        INNER JOIN personas ON empleados.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_empleados = $conn->query($sql_empleados);
+
+        if ($result_empleados === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_empleados->fetch_assoc()) {
+            echo '<option value="' . $row_empleado["id_empleado"] . '">'
+                . $row_empleado["id_empleado"] . ' - ' . $row_empleado["nombres"] . ' ' . $row_empleado["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
         </div>
-    </div>
 
+        <div class="form-grupo">
+          <label for="">tipo de documento:</label>
+          <select name="tipo_doc" id="tipo_doc">
+        <?php
+        include '../config/connection.php';
 
+        $sql_tipos = "SELECT * FROM tipos_documentos";
+        $result_tipos = $conn->query($sql_tipos);
 
-    <div id="table-pacientes" class="table-container">
+        if ($result_tipos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
 
-        <div class="tabla">
+        while ($row_tipo = $result_tipos->fetch_assoc()) {
+            echo '<option value="' . $row_tipo["id_documento"] . '">'
+            . $row_tipo["tipo_documento"] . '</option>';
+        }
 
-            <table class="documentacion">
-                <thead>
-                    <tr>
-                        <th>id</th>
-                        <th>Nombres</th>
-                        <th>Apellido</th>
-                        <th>Sexo</th>
-                        <th>Fecha Nacimiento</th>
-                        <th>Telefono</th>
-                        <th>Correo</th>
-                        <th>Tipo de Medico</th>
-                        <th>Especialidades</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>aaaaaa</td>
-                        <td>Gon</td>
-                        <td>Femenino</td>
-                        <td>16/04/2003</td>
-                        <td>3704944825</td>
-                        <td>magali@gmail.com</td>
-                        <td>Titular</td>
-                        <td>General</td>
-                        <td style="white-space: nowrap;">
-                            <button class="editarBtn" onclick="">Editar</button>
-                            <button class="eliminarBtn" onclick="">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="crud-buttons">
-                <button id="agregar" class="agregarBtn">Agregar</button>
-            </div>
+        $conn->close();
+        ?>
+        </select>
         </div>
-    </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
-    <script src="../functions/documentacion.js"></script>
+        <div class="form-grupo">
+          <label for="">N° DNI:</label>
+          <input type="int" name="dni" id="dni" placeholder="inserte solo numeros">
+        </div>
+        
+        <div class="form-grupo">
+          <label for="">N° NIF:</label>
+          <input type="int" name="nif" id="nif" placeholder="inserte solo numeros">
+        </div>
+        <div class="form-grupo">
+          <label for="">N° NSS:</label>
+          <input type="int" name="nss" id="nss" placeholder="inserte solo numeros">
+        </div>
+      </div>
+      <input type="submit" name="editar_vac_emp" id="editar_vac_emp" class="editarE" value="editar">
+
+</form>
+
+</div>
+
+</div>
+
 </body>
 
 </html>

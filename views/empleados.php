@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -165,6 +175,35 @@
         </div>
 
         <div class="form-grupo">
+          <label for="">tipo de documento:</label>
+          <select name="tipo_doc" id="tipo_doc">
+        <?php
+        include '../config/connection.php';
+
+        $sql_tipos = "SELECT * FROM tipos_documentos";
+        $result_tipos = $conn->query($sql_tipos);
+
+        if ($result_tipos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_tipo = $result_tipos->fetch_assoc()) {
+            echo '<option value="' . $row_tipo["id_documento"] . '">'
+            . $row_tipo["tipo_documento"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+        </select>
+        </div>
+
+        <div class="form-grupo">
+          <label for="">N° DNI:</label>
+          <input type="int" name="dni" id="dni" placeholder="inserte solo numeros">
+        </div>
+
+
+        <div class="form-grupo">
           <label for="">Fecha Nacimiento :</label>
           <input type="text" name="fechaN" id="fechaN">
         </div>
@@ -209,6 +248,7 @@
             <input type="hidden" name="id_persona" id="id_persona" value="">
             <input type="hidden" name="id_registro" id="id_registro" value="">
             <input type="hidden" name="id_puesto" id="id_puesto" value="">
+            <input type="hidden" name="id_documentacion" id="id_documentacion" value="">
         <div class="form-grupo">
           <label for="">Nombres:</label>
           <input type="text" name="nombre" id="nombre">

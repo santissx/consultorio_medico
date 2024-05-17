@@ -6,10 +6,11 @@ if (isset($_POST["guardar-medicamento"]) && isset($_POST["nombre"]) && isset($_P
     $nombre = $_POST["nombre"];
     $descrip = $_POST["descripcion"];
     $ingrediente = $_POST["ingrediente"];
+    $activo = $_POST["activo"];
 
     // Iniciar una transacción para asegurar la integridad de los datos
     $conn->begin_transaction();
-    $sql_medicamento = "INSERT INTO medicamentos (nombre, descripcion, ingrediente_activo) VALUES ('$nombre', '$descrip', '$ingrediente')";
+    $sql_medicamento = "INSERT INTO medicamentos (nombre, descripcion, ingrediente_activo, activo) VALUES ('$nombre', '$descrip', '$ingrediente', '$activo')";
     $conn->query($sql_medicamento);
 
     $conn->commit();

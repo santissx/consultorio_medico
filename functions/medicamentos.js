@@ -28,6 +28,16 @@ document.addEventListener("DOMContentLoaded", function () {
   var contenedorFormulariop = document.getElementById("formularioContainerP");
   var botonCerrarp = document.getElementById("cerrarP");
 
+  var botonesEditarP = document.querySelectorAll(".editarP");
+  var contenedorFormularioEditarP = document.getElementById("formularioEditarContainerP");
+  var botonCerrarEditarP = document.getElementById("cerrareditarP");
+
+
+  
+  var botonesEditarM = document.querySelectorAll(".editarM");
+  var contenedorFormularioEditarM = document.getElementById("formularioEditarContainerM");
+  var botonCerrarEditarM = document.getElementById("cerrareditarM");
+
   botonAgregar.addEventListener("click", function () {
       contenedorFormulariom.style.display = "flex";
   });
@@ -46,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (event.target == contenedorFormulariop) {
         contenedorFormulariop.style.display = "none";
     }
-});
+  });
   // Cierra el formulario si se hace clic fuera de él
   window.addEventListener("click", function (event) {
       if (event.target == contenedorFormulariom) {
@@ -67,10 +77,63 @@ document.addEventListener("DOMContentLoaded", function () {
   // Evita que el clic en el formulario cierre la ventana emergente
   contenedorFormulariop.querySelector(".formulario").addEventListener("click", function (event) {
     event.stopPropagation();
+  });
+
+
+  botonesEditarM.forEach(function (boton) {
+      boton.addEventListener("click", function () {
+          contenedorFormularioEditarM.style.display = "flex";
+          var id_medicamento = boton.getAttribute("data-id");
+          // Establecer los valores en los campos ocultos del formulario de edición
+          document.getElementById("id_medicamento").value = id_medicamento;
+          console.log("ID del medicamento es:", id_medicamento);
+      });
+  });
+  
+  botonesEditarP.forEach(function (boton) {
+    boton.addEventListener("click", function () {
+        contenedorFormularioEditarP.style.display = "flex";
+        var id_prescripcion = boton.getAttribute("data-id");
+        document.getElementById("id_prescripcion").value = id_prescripcion;
+        console.log("ID de la prescripción es:", id_prescripcion);
+    });
 });
+
+
+  botonCerrarEditarM.addEventListener("click", function () {
+      contenedorFormularioEditarM.style.display = "none";
+  });
+
+  botonCerrarEditarP.addEventListener("click", function () {
+    contenedorFormularioEditarP.style.display = "none";
+});
+
+  window.addEventListener("click", function (event) {
+      if (event.target == contenedorFormularioEditarM) {
+          contenedorFormularioEditarM.style.display = "none";
+      }
+  });
+
+  window.addEventListener("click", function (event) {
+    if (event.target == contenedorFormularioEditarP) {
+        contenedorFormularioEditarP.style.display = "none";
+    }
+});
+
+  contenedorFormularioEditarM.querySelector(".formulario").addEventListener("click", function (event) {
+      event.stopPropagation();
+  });
+
+  contenedorFormularioEditarP.querySelector(".formulario").addEventListener("click", function (event) {
+    event.stopPropagation();
+});
+
+   
 
   // Ocultar los formularios al cargar la página
   contenedorFormulariom.style.display = "none";
   contenedorFormulariop.style.display = "none";
-
+  contenedorFormularioEditarM.style.display = "none";
+  contenedorFormularioEditarP.style.display = "none";
 });
+

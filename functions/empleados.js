@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var idPuesto = boton.getAttribute("data-id-puesto");  // Asegúrate de usar el atributo correcto
             var idPersonal = boton.getAttribute("data-id-personal");
             var idregistro = boton.getAttribute("data-id-registro");
+            var iddocumentacion = boton.getAttribute("data-id-documentacion");
     
             // Establecer los valores en los campos ocultos del formulario de edición
             document.getElementById("id_empleado").value = idEmpleado;
@@ -42,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("id_puesto").value = idPuesto;
             document.getElementById("id_personal").value = idPersonal;
             document.getElementById("id_registro").value = idregistro;
+            document.getElementById("id_documentacion").value = iddocumentacion;
             console.log("ID del Empleado:", idEmpleado);
             console.log("ID del personal:", idPersonal);
             console.log("ID de la Persona:", idPersona);

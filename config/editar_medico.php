@@ -14,7 +14,7 @@ if (isset($_POST["editar_med"])) {
     $fechaN = $_POST["fechaN"];
     $telefono = $_POST["telefono"];
     $correo = $_POST["correo"];
-    $tipo = $_POST["tipo"];
+    $tipo = $_POST["tipo_medico"];
     $id_especialidad = $_POST["especialidad"];
 
     // Iniciar una transacción para asegurar la integridad de los datos
@@ -45,7 +45,7 @@ if (isset($_POST["editar_med"])) {
     }
 
     // Actualizar la tabla `medicos`
-    $sql_medico = "UPDATE medicos SET tipo_medico='$tipo' WHERE id_medico='$id_medico'";
+    $sql_medico = "UPDATE medicos SET id_tipo='$tipo' WHERE id_medico='$id_medico'";
     if (!$conn->query($sql_medico)) {
         echo "Error en la actualización de medicos: " . $conn->error;
         $conn->rollback(); // Deshacer la transacción en caso de error

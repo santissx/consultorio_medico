@@ -34,12 +34,15 @@ document.addEventListener("DOMContentLoaded", function () {
             var idPersona = boton.getAttribute("data-id-persona"); 
             var idEspecialidad = boton.getAttribute("data-id-especialidad");  // Asegúrate de usar el atributo correcto
             var idPersonal = boton.getAttribute("data-id-personal");
+            var iddocumentacion = boton.getAttribute("data-id-documentacion");
     
             // Establecer los valores en los campos ocultos del formulario de edición
+            
             document.getElementById("id_medico").value = idMedico;
             document.getElementById("id_persona").value = idPersona;
             document.getElementById("id_especialidad").value = idEspecialidad;
             document.getElementById("id_personal").value = idPersonal;
+            document.getElementById("id_documentacion").value = iddocumentacion;
             console.log("ID del Médico:", idMedico);
             console.log("ID del personal:", idPersonal);
             console.log("ID de la Persona:", idPersona);

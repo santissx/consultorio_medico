@@ -13,8 +13,11 @@ if (isset($_POST["editar_pac"])) {
     $sexo = $_POST["sexo"];
     $fechaN = $_POST["fechaN"];
     $telefono = $_POST["telefono"];
+    $dni= $_POST["dni"];
     $correo = $_POST["correo"];
     $informacion_medica = $_POST["informacion_medica"];
+    $id_documentacion= $_POST["id_documentacion"];
+    $id_tipo= $_POST["id_documento"];
 
     // Iniciar una transacción para asegurar la integridad de los datos
     $conn->begin_transaction();
@@ -34,7 +37,12 @@ if (isset($_POST["editar_pac"])) {
         $conn->rollback(); // Deshacer la transacción en caso de error
         exit;
     }
-
+    $sql_documento = "UPDATE documentaciones SET id_tipos_documentos='$id_tipo', dni='$dni' WHERE id_documento='$id_documento'";
+    if (!$conn->query($sql_documento)) {
+        echo "Error en la actualización de documentos: " . $conn->error;
+        $conn->rollback(); // Deshacer la transacción en caso de error
+        exit;
+    }
     // Actualizar `datos_personales`
     $sql_datos_personales = "UPDATE datos_personales SET telefonos='$telefono', correo='$correo' WHERE id_personal='$id_personal'";
     if (!$conn->query($sql_datos_personales)) {
@@ -44,7 +52,7 @@ if (isset($_POST["editar_pac"])) {
     }
 
     // Actualizar la tabla `medicosxpacientes`
-    $sql_especialidad = "UPDATE medicosxpacientes SET id_medico='$id_medico' and id_paciente='$id_paciente' WHERE id_medico='$id_medico'";
+    $sql_especialidad = "UPDATE medicosxpacientes SET id_medico='$id_medico', id_paciente='$id_paciente'";;
     if (!$conn->query($sql_especialidad)) {
         echo "Error en la actualización de especialidades: " . $conn->error;
         $conn->rollback(); // Deshacer la transacción en caso de error

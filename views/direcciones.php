@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,42 +88,191 @@
                 <tr>
                     <th>id</th>
                     <th>Tipo de Residencia</th>
-                    <th>País</th>
                     <th>Provincia</th>
                     <th>Localidad</th>
-                    <th>Población</th>
                     <th>Código Postal</th>
                     <th>Barrio</th>
                     <th>Calle</th>
-                    <th>Id Medico</th>
+                    <th>Id y Nombre del Medico</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
 
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Deparrtamento</td>
-                    <td>Argentina</td>
-                    <td>Formosa</td>
-                    <td>Formosa</td>
-                    <td>606.041</td>
-                    <td>3600</td>
-                    <td>San Martin</td>
-                    <td>Corrientes 1090</td>
-                    <td>1</td>
-                    <td style="white-space: nowrap;">
-                        <button class="editarBtn" onclick="">Editar</button>
-                        <button class="eliminarBtn" onclick="">Eliminar</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                   
+                   <?php
+                   include '../config/connection.php';
+           
+                  
+       $sql = "SELECT
+    direcciones.id_direccion,
+    direcciones.tipo_residencia,
+    direcciones.altura,
+    calles.id_calle,
+    calles.nom_calle,
+    barrios.id_barrio,
+    barrios.nom_barrio,
+    localidades.id_localidad,
+    localidades.nom_loc,
+    localidades.codigo_postal,
+    provincias.id_provincia,
+    medicos.id_medico,
+    personas.id_persona,
+    registros.nombres AS medico_nombre,
+    registros.apellidos AS medico_apellido
+    FROM
+    direcciones
+   INNER JOIN medicos ON direcciones.id_medico = medicos.id_medico
+   INNER JOIN personas ON medicos.id_persona = personas.id_persona
+   INNER JOIN registros ON personas.id_registro = registros.id_registro
+   INNER JOIN calles ON direcciones.id_calle = calles.id_calle
+   INNER JOIN barrios ON calles.id_barrio = barrios.id_barrio
+   INNER JOIN localidades ON barrios.id_localidad = localidades.id_localidad
+   INNER JOIN provincias ON localidades.id_provincia = provincias.id_provincia";
+  
+   $result = $conn->query($sql);
 
-        <div class="crud-buttons">
-            <button id="agregar" class="agregarBtn">Agregar</button>
+   if ($result === false) {
+     die('Error en la consulta: ' . $conn->error);
+   }
+
+
+   if ($result->num_rows > 0) {
+
+
+     while ($row = $result->fetch_assoc()) {
+
+                       //Registrar los datos
+                       echo "<tr>";
+                       echo "<td>" . $row["id_direccion"] . "</td>";
+                       echo "<td>" . $row["tipo_residencia"] . "</td>";
+                       echo "<td>" . $row["nom_prov"] . "</td>";
+                       echo "<td>" . $row["nom_loc"] . "</td>";
+                       echo "<td>" . $row["codigo_postal"] . "</td>";
+                       echo "<td>" . $row["nom_barrio"] . "</td>";
+                       echo "<td>" . $row["nom_calle"] . "</td>";
+                       echo "<td>" . $row["altura"] . "</td>";
+                       echo "<td>" . $row["id_medico"] . ' - ' . $row["medico_nombre"] . ' ' . $row["medico_apellido"] . "</td>";
+                       echo '<td style="white-space: nowrap;">
+                       <button data-id="' . $row["id_direccion"] . '" class="btn editarBtn btn editarM">Editar</button>
+                       <a href="../config/eliminar_direcciones.php?id=' . $row["id_direccion"] . '" class="eliminarBtn btn eliminarM" onclick="confirmacion(event)">Eliminar</a>
+                       </td>';
+                       echo "</tr>";
+                     }
+                   } else { //No hay registros ingresados
+                     echo "<tr>";
+                     echo "<td colspan='9'>No hay registros</td>";
+                    
+                     echo "</tr>";
+                   }
+                   //Cerrar conexión
+                   $conn->close();
+           
+                   ?>
+                 </tbody>
+               </table>
+                       <div class="crud-buttons">
+                           <button id="agregarM" class="agregarBtn">Agregar</button>
+                       </div> 
+                   </div>
+               </div>
+
+
+<!--FORMULARIO PARA AGREGAR DATOS-->
+<div id="formularioContainerM" class="formulario-container">
+    <div class="formulario">
+      <span id="cerrarM" class="cerrar-formulario">&times;</span>
+      <h2>Registrar Direccion del medico</h2>
+      <form class="medicamento-form" action="../config/guardar_vacaciones.php" method="post">
+      <input type="hidden" name="id_empleado" id="id_empleado" value="">
+      <input type="hidden" name="id_paciente" id="id_paciente" value="">
+      
+      <div class="form-grupo">
+        <label for="">id y nombre del medico:</label>
+          <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+        echo '<option value="">---</option>';
+        $sql_medicos = "SELECT medicos.id_medico, registros.nombres, registros.apellidos
+        FROM medicos 
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+            echo '<option value="' . $row_medico["id_medico"] . '">'
+                . $row_medico["id_medico"] . ' - ' . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
         </div>
+
+        <div class="form-grupo">
+          <label for="">tipo de residencia:</label>
+          <input type="text" name="tipo_res" id="tipo_res">
+        </div>
+
+        <div class="form-grupo">
+        <label for="">provincia:</label>
+          <select name="id_provincia" id="id_provincia">
+        <?php
+        include '../config/connection.php';
+        echo '<option value="">---</option>';
+        $sql_provincias = "SELECT * FROM provincias"; 
+        $result_provincias = $conn->query($sql_provincias);
+
+        if ($result_provincias === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_provincia = $result_provincias->fetch_assoc()) {
+            echo '<option value="' . $row_provincia["id_provincia"] . '">'
+                . $row_provincia["id_provincia"] . ' - ' . $row_provincia["nom_prov"] . '</option>';
+        }
+        $conn->close();
+        ?>
+    </select>
+        </div>
+        <div class="form-grupo">
+        <label for="">localidad:</label>
+        <select name="id_localidad" id="id_localidad" onchange="getbarrio()">
+            <option value="">Seleccionar</option>
+            </select>
+        </div>
+        <div class="form-grupo">
+        <div class="form-grupo">
+    <label for="">Barrio:</label>
+    <select name="id_barrio" id="id_barrio" onchange="getcalles()">
+        <option value="">Seleccionar</option>
+        <!-- Aquí se agregarán las opciones de barrio dinámicamente -->
+    </select>
+</div>
+    <div class="form-grupo">
+    <label for="">calles:</label>
+    <select name="id_calle" id="id_calle">
+        <option value="">Seleccionar</option>
+    </select>
     </div>
+        
+        <div class="form-grupo">
+          <label for="">Altura:</label>
+          <input type="int" name="altura" id="altura">
+        </div>
+        
+        
+        <input type="submit" name="guardar_direcciones.php" id="guardar-vacaciones-medicos" class="guardarM" value="Guardar">
+
+      </form>
+
+  </div>
+
 </div>
 
 
@@ -216,5 +375,6 @@
 
 <script src="../js/bootstrap.bundle.min.js"></script>
 <script src="../functions/direcciones.js"></script>
+<script src="../functions/peticiones.js"></script>
 </body>
 </html>

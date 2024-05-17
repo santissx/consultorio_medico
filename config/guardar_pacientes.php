@@ -11,7 +11,8 @@ if (isset($_POST["guardar_pacientes"])) {
     $correo = $_POST["correo"];
     $id_medico = $_POST["id_medico"];
     $informacion_medica = $_POST["informacion_medica"];
-
+    $dni= $_POST["dni"];
+    $tipo= $_POST["id_documento"];
     // Iniciar una transacción para asegurar la integridad de los datos
     $conn->begin_transaction();
     // Resto del código...
@@ -22,9 +23,19 @@ if (isset($_POST["guardar_pacientes"])) {
     // Obtener el ID generado para la tabla `registros`
     $id_registro = $conn->insert_id;
 
-    // 2. Insertar en la tabla `personas`
-    $sql_persona = "INSERT INTO personas (sexo, fecha_nacimiento, id_registro) VALUES ('$sexo', '$fechaN', '$id_registro')";
-    $conn->query($sql_persona);
+    
+    // 2. Insertar en la tabla `documentaciones`
+    $sql_documentacion = "INSERT INTO documentaciones (id_tipos_documentos, dni) VALUES ('$tipo', '$dni')";
+    $conn->query($sql_documentacion);
+
+     // Obtener el ID generado para la tabla `documentaciones`
+     $id_documentacion = $conn->insert_id;
+
+     // 3. Insertar en la tabla `personas` utilizando los IDs de registro y documentación
+     $sql_persona = "INSERT INTO personas (sexo, fecha_nacimiento, id_registro, id_documentacion) VALUES ('$sexo', '$fechaN', '$id_registro', '$id_documentacion')";
+     $conn->query($sql_persona);
+
+ 
 
     // Obtener el ID generado para la tabla `personas`
     $id_persona = $conn->insert_id;
@@ -43,8 +54,8 @@ if (isset($_POST["guardar_pacientes"])) {
     $sql_medicosxpacientes = "INSERT INTO medicosxpacientes (id_medico, id_paciente) VALUES ('$id_medico', '$id_paciente')";
     $conn->query($sql_medicosxpacientes);
     
-    $id_documentacion = $conn->insert_id;
 
+    
 
     // Confirmar la transacción si todo está bien
     $conn->commit();

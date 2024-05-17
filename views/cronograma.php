@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +16,8 @@
     <title>Document</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="cronograma.css">
+    <script src="../functions/cronogramas.js"></script>
+    <script src="../js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     
@@ -66,34 +78,262 @@
                     <th>id</th>
                     <th>Nombres</th>
                     <th>Apellido</th>
-                    <th>Especialidad</th>
+                    <th>Día</th>
                     <th>Horario de incio de Consultas</th>
                     <th>Horario de cierre de Consultas</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
-
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Luana Magali</td>
-                    <td>Gon</td>
-                    <td>General</td>
-                    <td>17:00:00</td>
-                    <td>20:00:00</td>
-                    <td style="white-space: nowrap;">
-                        <button class="editarBtn" onclick="">Editar</button>
-                        <button class="eliminarBtn" onclick="">Eliminar</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+              <?php
+        include '../config/connection.php';
 
-        <div class="crud-buttons">
-            <button class="agregarBtn" onclick="">Agregar</button>
+       $sql = "SELECT
+        cronogramas.id_cronograma,
+        cronogramas.dia,
+        horarios_entradas.id_horario_entrada,
+        horarios_entradas.hora_entrada,
+        horarios_salidas.id_horario_salida,
+        horarios_salidas.hora_salida,
+        medicos.id_medico,
+        medicos.id_persona,
+        registros.nombres AS nombres_medico,
+        registros.apellidos AS apellidos_medico
+    FROM
+        cronogramas
+        INNER JOIN medicos ON cronogramas.id_medico = medicos.id_medico
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro
+        INNER JOIN horarios_salidas on cronogramas.id_horario_salida = horarios_salidas.id_horario_salida
+        INNER JOIN horarios_entradas on cronogramas.id_horario_entrada = horarios_entradas.id_horario_entrada";
+ 
+       
+        $result = $conn->query($sql);
+
+        if ($result === false) {
+          die('Error en la consulta: ' . $conn->error);
+        }
+
+
+        if ($result->num_rows > 0) {
+
+
+          while ($row = $result->fetch_assoc()) {
+
+            //Registrar los datos
+            echo "<tr>";
+            echo "<td>" . $row["id_cronograma"] . "</td>";
+            echo "<td>" . $row["nombres_medico"]  . "</td>";
+            echo "<td>" . $row["apellidos_medico"] . "</td>";
+            echo "<td>" . $row["dia"] . "</td>";
+            echo "<td>" . $row["hora_entrada"] . "</td>";
+            echo "<td>" . $row["hora_salida"] . "</td>";
+            echo '<td style="white-space: nowrap;">
+            <button data-id="' . $row["id_cronograma"] . '" class="btn editarBtn editar">Editar</button>
+            <a href="../config/eliminar_cronograma.php?id_cronograma=' . $row["id_cronograma"] . '" class="eliminarBtn btn eliminar" onclick="confirmacion(event)">Eliminar</a>
+            </td>';
+            echo "</tr>";
+          }
+        } else { //No hay registros ingresados
+          echo "<tr>";
+          echo "<td colspan='9'>No hay registros</td>";
+         
+          echo "</tr>";
+        }
+        //Cerrar conexión
+        $conn->close();
+
+        ?>
+      </tbody>
+    </table>
+            <div class="crud-buttons">
+                <button id="agregar" class="agregarBtn">Agregar</button>
+            </div>
         </div>
+
+
+        
+
+  <!--FORMULARIO PARA AGREGAR DATOS-->
+  <div id="formularioContainer" class="formulario-container">
+    <div class="formulario">
+      <span id="cerrar" class="cerrar-formulario">&times;</span>
+      <h2>Registrar cronograma</h2>
+      <form class="medico-form" action="../config/guardar_cronograma.php" method="post">
+
+        <div class="form-grupo">
+        <label for="">id y nombre del medico:</label>
+          <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+        echo '<option value="">---</option>';
+        $sql_medicos = "SELECT medicos.id_medico, registros.nombres, registros.apellidos
+        FROM medicos 
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+            echo '<option value="' . $row_medico["id_medico"] . '">'
+                . $row_medico["id_medico"] . ' - ' . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
+        </div>
+
+        <div class="form-grupo">
+          <label for="">dia:</label>
+          <input type="date" name="dia" id="dia">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">horario entrada:</label>
+          <select name="id_horario_entrada" id="id_horario_entrada">
+        <?php
+        include '../config/connection.php';
+
+        $sql_horarios1 = "SELECT * FROM horarios_entradas";
+        $result_horarios1 = $conn->query($sql_horarios1);
+
+        if ($result_horarios1 === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_horario1 = $result_horarios1->fetch_assoc()) {
+            echo '<option value="' . $row_horario1["id_horario_entrada"] . '">'
+                . $row_horario1["hora_entrada"] . '</option>';
+        }
+        $conn->close();
+        ?>
+    </select>
+        </div>
+        <div class="form-grupo">
+          <label for="">horario salida:</label>
+          <select name="id_horario_salida" id="id_horario_salida">
+        <?php
+        include '../config/connection.php';
+
+        $sql_horarios2 = "SELECT * FROM horarios_salidas";
+        $result_horarios2 = $conn->query($sql_horarios2);
+
+        if ($result_horarios2 === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_horario2 = $result_horarios2->fetch_assoc()) {
+            echo '<option value="' . $row_horario2["id_horario_salida"] . '">'
+                . $row_horario2["hora_salida"] . '</option>';
+              }
+              $conn->close();
+              ?>
+          </select>
+              </div>
+        <input type="submit" name="guardar_cronograma" id="guardar_cronograma" class="guardar" value="Guardar">
+
+      </form>
+
     </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
+  </div>
+      
+    
+  <!--FORMULARIO PARA EDITAR DATOS-->
+  <div id="formularioEditarContainer" class="formulario-container">
+    <div class="formulario">
+        <span id="cerrareditar" class="cerrar-formulario">&times;</span>
+        <h2>Editar cronograma</h2>
+        <form class="medico-form" action="../config/guardar_cronograma.php" method="post">
+        <input type="hidden" name="id_cronograma" id="id_cronograma" value="">  
+
+        <div class="form-grupo">
+        <label for="">id y nombre del medico:</label>
+          <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+
+        $sql_medicos = "SELECT medicos.id_medico, registros.nombres, registros.apellidos
+        FROM medicos 
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+            echo '<option value="' . $row_medico["id_medico"] . '">'
+                . $row_medico["id_medico"] . ' - ' . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
+        </div>
+
+        <div class="form-grupo">
+          <label for="">dia:</label>
+          <input type="date" name="dia" id="dia">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">horario entrada:</label>
+          <select name="id_horario_entrada" id="id_horario_entrada">
+        <?php
+        include '../config/connection.php';
+
+        $sql_horarios1 = "SELECT * FROM horarios_entradas";
+        $result_horarios1 = $conn->query($sql_horarios1);
+
+        if ($result_horarios1 === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_horario1 = $result_horarios1->fetch_assoc()) {
+            echo '<option value="' . $row_horario1["id_horario_entrada"] . '">'
+                . $row_horario1["hora_entrada"] . '</option>';
+        }
+        $conn->close();
+        ?>
+    </select>
+        </div>
+        <div class="form-grupo">
+          <label for="">horario salida:</label>
+          <select name="id_horario_salida" id="id_horario_salida">
+        <?php
+        include '../config/connection.php';
+
+        $sql_horarios2 = "SELECT * FROM horarios_salidas";
+        $result_horarios2 = $conn->query($sql_horarios2);
+
+        if ($result_horarios2 === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_horario2 = $result_horarios2->fetch_assoc()) {
+            echo '<option value="' . $row_horario2["id_horario_salida"] . '">'
+                . $row_horario2["hora_salida"] . '</option>';
+              }
+              $conn->close();
+              ?>
+          </select>
+              </div>
+        <input type="submit" name="editar_cronograma" id="editar_cronograma" class="editar" value="editar">
+
+      </form>
+
+    </div>
+
+  </div>
+
+
 </body>
 </html>

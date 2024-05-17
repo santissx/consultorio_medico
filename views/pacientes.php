@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -72,6 +82,7 @@
             <th>Sexo</th>
             <th>Fecha Nacimiento</th>
             <th>Telefono</th>
+            <th>Tipo y N° de Documentos</th>
             <th>Correo</th>
             <th>Medico Encargado</th>
             <th>Informe Medico</th>
@@ -95,14 +106,20 @@
         datos_personales.id_personal,
         medicos.id_medico,
         registros.id_registro,
-        pacientes.informacion_medica
+        pacientes.informacion_medica,
+        documentaciones.id_documentacion,
+        documentaciones.dni,
+        tipos_documentos.id_documento,
+        tipos_documentos.tipo_documento
     FROM
         pacientes
         INNER JOIN personas ON pacientes.id_persona = personas.id_persona
         INNER JOIN datos_personales ON personas.id_persona = datos_personales.id_persona
         INNER JOIN medicosxpacientes ON pacientes.id_paciente = medicosxpacientes.id_paciente
         INNER JOIN medicos ON medicosxpacientes.id_medico = medicos.id_medico
-        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+        INNER JOIN registros ON personas.id_registro = registros.id_registro
+        INNER JOIN documentaciones on personas.id_documentacion = documentaciones.id_documentacion
+        INNER JOIN tipos_documentos on documentaciones.id_tipos_documentos = tipos_documentos.id_documento";
 
         $result = $conn->query($sql);
 
@@ -119,6 +136,7 @@
             echo "<td>" . $row["sexo"] . "</td>";
             echo "<td>" . $row["fecha_nacimiento"] . "</td>";
             echo "<td>" . $row["telefonos"] . "</td>";
+            echo "<td>" . $row["tipo_documento"] . '-' . $row["dni"] . "</td>";
             echo "<td>" . $row["correo"] . "</td>";
             echo "<td>" . $row["id_medico"] . "</td>"; 
             echo "<td>" . $row["informacion_medica"] . "</td>";
@@ -126,9 +144,11 @@
             <button data-id="' . $row["id_paciente"] . '" 
             data-id-Medico="' . $row["id_medico"] . '"
             data-id-persona="' . $row["id_persona"] . '"
+            data-id-documento="' . $row["id_documento"] . '"
+            data-id-documentacion="' . $row["id_documentacion"] . '"            
             data-id-registro="' . $row["id_registro"] . '"
             data-id-personal="' . $row["id_personal"] . '" class="btn editarBtn btn">Editar</button>
-            <a href="../config/eliminar_paciente.php?id=' . $row["id_paciente"] . '&id_persona=' . $row["id_persona"] .  '&id_medico=' . $row["id_medico"] . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
+            <a href="../config/eliminar_paciente.php?id=' . $row["id_paciente"] . '&id_persona=' . $row["id_persona"] .  '&id_medico=' . $row["id_medico"] . '&id_documentacion='. $row["id_documentacion"] .  '&id_documento='. $row["id_documento"]  . '" class="eliminarBtn btn" onclick="confirmacion(event)">Eliminar</a>
 
             </td>';
             echo "</tr>";
@@ -164,6 +184,33 @@
           <label for="">Apellido:</label>
           <input type="text" name="apellido" id="apellido">
         </div>
+        <div class="form-grupo">
+    <label for="tipo_doc">tipo de documento:</label>
+    <select name="id_documento" id="id_documento">
+    <?php
+    include '../config/connection.php';
+
+    $sql_tipo_documento = "SELECT * FROM tipos_documentos"; 
+    
+    $result_doc = $conn->query($sql_tipo_documento);
+
+    if ($result_doc === false) {
+        die('Error en la consulta: ' . $conn->error);
+    }
+
+    while ($row_doc = $result_doc->fetch_assoc()) {
+      echo '<option value="' . $row_doc["id_documento"] . '">'
+      . $row_doc["tipo_documento"] . '</option>';
+    }
+
+    $conn->close();
+    ?>
+</select>
+</div>
+        <div class="form-grupo">
+          <label for="">N° de documento:</label>
+          <input type="int" name="dni" id="dni" placeholder='solo ingresar numeros'>
+        </div>
 
         <div class="form-grupo">
           <label for="">Sexo:</label>
@@ -172,7 +219,7 @@
 
         <div class="form-grupo">
           <label for="">Fecha Nacimiento :</label>
-          <input type="text" name="fechaN" id="fechaN">
+          <input type="date" name="fechaN" id="fechaN">
         </div>
 
         <div class="form-grupo">
@@ -232,6 +279,8 @@
             <input type="hidden" name="id_persona" id="id_persona" value="">
             <input type="hidden" name="id_registro" id="id_registro" value="">
             <input type="hidden" name="id_medico" id="id_medico" value="">
+            <input type="hidden" name="id_documentacion" id="id_documentacion" value="">
+            <input type="hidden" name="id_documento" id="id_documento" value="">
         <div class="form-grupo">
           <label for="">Nombres:</label>
           <input type="text" name="nombre" id="nombre">
@@ -249,7 +298,7 @@
 
         <div class="form-grupo">
           <label for="">Fecha Nacimiento:</label>
-          <input type="text" name="fechaN" id="fechaN">
+          <input type="date" name="fechaN" id="fechaN">
         </div>
 
         <div class="form-grupo">
@@ -261,6 +310,34 @@
           <label for="">Correo:</label>
           <input type="email" name="correo" id="correo">
         </div>
+        <div class="form-grupo">
+    <label for="medico">tipo de documento:</label>
+    <select name="id_documento" id="id_documento">
+        <?php
+        include '../config/connection.php';
+
+        $sql_tipo_documento = "SELECT tipos_documentos.id_documento, tipos_documentos.tipo_documento FROM tipos_documentos"; 
+        
+        $result_doc = $conn->query($sql_tipo_documento);
+
+        if ($result_doc === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_doc = $result_docs->fetch_assoc()) {
+          echo '<option value="' . $row_doc["id_documento"] . '">'
+          . $row_doc["tipo_documento"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
+</div>
+        <div class="form-grupo">
+          <label for="">N° de documento:</label>
+          <input type="int" name="dni" id="dni" placeholder='solo ingresar numeros'>
+        </div>
+
         <div class="form-grupo">
           <label for="">informacion_medica:</label>
           <input type="text" name="informacion_medica" id="informacion_medica">

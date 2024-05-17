@@ -9,8 +9,11 @@ if (isset($_POST["guardar_med"])) {
     $fechaN = $_POST["fechaN"];
     $telefono = $_POST["telefono"];
     $correo = $_POST["correo"];
-    $tipo = $_POST["tipo"];
+    $tipo = $_POST["tipo_doc"];
     $id_especialidad = $_POST["especialidad"];
+    $id_tipo= $_POST["tipo_medico"];
+    $dni= $_POST["dni"];
+    $num_col= $_POST ["num_col"];
 
     // Iniciar una transacción para asegurar la integridad de los datos
     $conn->begin_transaction();
@@ -21,11 +24,20 @@ if (isset($_POST["guardar_med"])) {
 
     // Obtener el ID generado para la tabla `registros`
     $id_registro = $conn->insert_id;
-
-    // 2. Insertar en la tabla `personas`
-    $sql_persona = "INSERT INTO personas (sexo, fecha_nacimiento, id_registro) VALUES ('$sexo', '$fechaN', '$id_registro')";
+    
+    // 2. Insertar en la tabla `documentaciones`
+    $sql_documentacion = "INSERT INTO documentaciones (dni) VALUES ('$dni')";
+    $conn->query($sql_documentacion);
+  
+    
+    // Obtener el ID generado para la tabla `documentaciones`
+    $id_documentacion = $conn->insert_id;
+  
+    
+    // 3. Insertar en la tabla `personas` utilizando los IDs de registro y documentación
+    $sql_persona = "INSERT INTO personas (sexo, fecha_nacimiento, id_registro, id_documentacion) VALUES ('$sexo', '$fechaN', '$id_registro', '$id_documentacion')";
     $conn->query($sql_persona);
-
+    
     // Obtener el ID generado para la tabla `personas`
     $id_persona = $conn->insert_id;
 
@@ -34,7 +46,8 @@ if (isset($_POST["guardar_med"])) {
     $conn->query($sql_datos_personales);
 
     // 4. Insertar en la tabla `medicos`
-    $sql_medico = "INSERT INTO medicos (tipo_medico, id_persona) VALUES ('$tipo', '$id_persona')";
+    $sql_medico = "INSERT INTO medicos (id_persona, id_tipo, nro_colegiado) VALUES ('$id_persona', '$id_tipo', '$num_col')";
+
     $conn->query($sql_medico);
 
     // Obtener el ID generado para la tabla `medicos`
@@ -45,13 +58,7 @@ if (isset($_POST["guardar_med"])) {
     $sql_medicoxespe = "INSERT INTO medicosxespecialidades (id_medico, id_especialidad) VALUES ('$id_medico', '$id_especialidad')";
     $conn->query($sql_medicoxespe);
 
-    $id_documentacion = $conn->insert_id;
-
-    //7. Insertar tabla documentacion id 
-    $sql_documentacion = "INSERT INTO documentaciones (id_documentacion) VALUES ('$id_documentacion')";
-    $conn->query($sql_documentacion);
-
-
+    
 
     // Confirmar la transacción si todo está bien
     $conn->commit();

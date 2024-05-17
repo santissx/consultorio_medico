@@ -5,7 +5,7 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $id_persona = $_GET['id_persona'];
     $id_medico = $_GET['id_medico'];
-
+    $id_documentacion = $_GET['id_documentacion'];
 
     $eliminar_medxpac = "DELETE FROM medicosxpacientes WHERE id_paciente='$id'";
     $resultado4 = mysqli_query ($conn, $eliminar_medxpac);
@@ -21,6 +21,8 @@ if (isset($_GET['id'])) {
 
     $eliminar_persona = "DELETE FROM personas WHERE id_persona='$id_persona'";
     $resultado3 = mysqli_query($conn, $eliminar_persona);
+    $eliminar_documentacion = "DELETE FROM documentaciones WHERE id_documentacion='$id_documentacion'";
+    $resultado3 = mysqli_query($conn, $eliminar_documentacion);
 
     if ($resultado) {
         echo "El paciente ha sido eliminado exitosamente.";

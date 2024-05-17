@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+
+if (!isset($_SESSION['id_usuario'])) {
+    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
+    header("refresh:1;url=login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +17,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="sustituciones.css">
+
 </head>
 
 <body>
@@ -67,36 +78,234 @@
                   <tr>
                       <th>id</th>
                       <th>Id del Medico</th>
-                      <th>Apellido del Medico</th>
+                      <th>Nombre y Apellido del Medico</th>
                       <th>Alta Suplencia</th>
                       <th>Baja Suplencia</th>
-                      <th>Tipo de Revista</th>
+                      <th>Estado de la sustitucion</th>
                       <th>Acciones</th>
                   </tr>
               </thead>
   
               <tbody>
-                  <tr>
-                      <td>1</td>
-                      <td>1</td>
-                      <td>Gon</td>
-                      <td>2024-01-22</td>
-                      <td>2024-02-21</td>
-                      <td>Medica Mensual</td>
-                      <td style="white-space: nowrap;">
-                          <button class="editarBtn" onclick="">Editar</button>
-                          <button class="eliminarBtn" onclick="">Eliminar</button>
-                      </td>
-                  </tr>
-              </tbody>
-          </table>
-  
-          <div class="crud-buttons">
-              <button class="agregarBtn" onclick="">Agregar</button>
-          </div>
-      </div>
+              <?php
+        include '../config/connection.php';
+
+       $sql = "SELECT
+        sustituciones.id_sustitucion,
+        sustituciones.alta_suplencia,
+        sustituciones.baja_suplencia,
+        medicos.id_medico,
+        medicos.id_persona,
+        registros.nombres AS nombres_medico,
+        registros.apellidos AS apellidos_medico,
+        estados.id_estado,
+        estados.tipo_estado
+    FROM
+        sustituciones
+        INNER JOIN medicos ON sustituciones.id_medico = medicos.id_medico
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro
+        INNER JOIN estados on sustituciones.id_estado = estados.id_estado";
+ 
+       
+        $result = $conn->query($sql);
+
+        if ($result === false) {
+          die('Error en la consulta: ' . $conn->error);
+        }
+
+
+        if ($result->num_rows > 0) {
+
+
+          while ($row = $result->fetch_assoc()) {
+
+            //Registrar los datos
+            echo "<tr>";
+            echo "<td>" . $row["id_sustitucion"] . "</td>";
+            echo "<td>" . $row["id_medico"] . "</td>";
+            echo "<td>" . $row["nombres_medico"] . " " . $row["apellidos_medico"] . "</td>";
+            echo "<td>" . $row["alta_suplencia"] . "</td>";
+            echo "<td>" . $row["baja_suplencia"] . "</td>";
+            echo "<td>" . $row["tipo_estado"] .  "</td>";
+            echo '<td style="white-space: nowrap;">
+            <button data-id="' . $row["id_sustitucion"] . '" class="btn editarBtn editar">Editar</button>
+            <a href="../config/eliminar_sustitucion.php?id_sustitucion=' . $row["id_sustitucion"] . '" class="eliminarBtn btn eliminar" onclick="confirmacion(event)">Eliminar</a>
+            </td>';
+            echo "</tr>";
+          }
+        } else { //No hay registros ingresados
+          echo "<tr>";
+          echo "<td colspan='9'>No hay registros</td>";
+         
+          echo "</tr>";
+        }
+        //Cerrar conexión
+        $conn->close();
+
+        ?>
+      </tbody>
+    </table>
+            <div class="crud-buttons">
+                <button id="agregar" class="agregarBtn">Agregar</button>
+            </div>
+        </div>
       
-<script src="../js/bootstrap.bundle.min.js"></script>
+
+    
+
+  <!--FORMULARIO PARA AGREGAR DATOS-->
+  <div id="formularioContainer" class="formulario-container">
+    <div class="formulario">
+      <span id="cerrar" class="cerrar-formulario">&times;</span>
+      <h2>Registrar sustituciones</h2>
+      <form class="medico-form" action="../config/guardar_sustitucion.php" method="post">
+
+        <div class="form-grupo">
+        <label for="">id y nombre del medico:</label>
+          <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+
+        $sql_medicos = "SELECT medicos.id_medico, registros.nombres, registros.apellidos
+        FROM medicos 
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+            echo '<option value="' . $row_medico["id_medico"] . '">'
+                . $row_medico["id_medico"] . ' ' . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Alta suplencia:</label>
+          <input type="date" name="alta_suplencia" id="alta_suplencia">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Baja suplencia:</label>
+          <input type="date" name="baja_suplencia" id="baja_suplencia">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Estado de la suplencia:</label>
+          <select name="id_estado" id="id_estado">
+        <?php
+        include '../config/connection.php';
+
+        $sql_tipos = "SELECT * FROM estados";
+        $result_tipos = $conn->query($sql_tipos);
+
+        if ($result_tipos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_tipo = $result_tipos->fetch_assoc()) {
+            echo '<option value="' . $row_tipo["id_estado"] . '">'
+                . $row_tipo["tipo_estado"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+    </select>
+        </div>
+
+        <input type="submit" name="guardar_sustitucion" id="guardar_sustitucion" class="guardar" value="Guardar">
+
+      </form>
+
+    </div>
+
+  </div>
+  
+  <!--FORMULARIO PARA EDITAR DATOS-->
+  <div id="formularioEditarContainer" class="formulario-container">
+    <div class="formulario">
+        <span id="cerrareditar" class="cerrar-formulario">&times;</span>
+        <h2>Editar sustitucion</h2>
+        <form class="medico-form" action="../config/guardar_sustitucion.php" method="post">
+        <input type="hidden" name="id_sustitucion" id="id_sustitucion" value="">  
+
+        <div class="form-grupo">
+        <label for="">id y nombre del medico:</label>
+          <select name="id_medico" id="id_medico">
+        <?php
+        include '../config/connection.php';
+
+        $sql_medicos = "SELECT medicos.id_medico, registros.nombres, registros.apellidos
+        FROM medicos 
+        INNER JOIN personas ON medicos.id_persona = personas.id_persona
+        INNER JOIN registros ON personas.id_registro = registros.id_registro";
+
+        $result_medicos = $conn->query($sql_medicos);
+
+        if ($result_medicos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_medico = $result_medicos->fetch_assoc()) {
+            echo '<option value="' . $row_medico["id_medico"] . '">'
+                . $row_medico["id_medico"] . ' ' . $row_medico["nombres"] . ' ' . $row_medico["apellidos"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+        </select>
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Alta suplencia:</label>
+          <input type="date" name="alta_suplencia" id="alta_suplencia">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Baja suplencia:</label>
+          <input type="date" name="baja_suplencia" id="baja_suplencia">
+        </div>
+
+        <div class="form-grupo">
+          <label for="">Estado de la suplencia:</label>
+          <select name="id_estado" id="id_estado">
+        <?php
+        include '../config/connection.php';
+
+        $sql_tipos = "SELECT * FROM estados";
+        $result_tipos = $conn->query($sql_tipos);
+
+        if ($result_tipos === false) {
+            die('Error en la consulta: ' . $conn->error);
+        }
+
+        while ($row_tipo = $result_tipos->fetch_assoc()) {
+            echo '<option value="' . $row_tipo["id_estado"] . '">'
+                . $row_tipo["tipo_estado"] . '</option>';
+        }
+
+        $conn->close();
+        ?>
+        </select>
+        </div>
+        <input type="submit" name="editar_sustitucion" id="editar_sustitucion" class="editar" value="editar">
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <script src="../js/bootstrap.bundle.min.js"></script>
+    <script src="../functions/sustituciones.js"></script>
 </body>
 
 </html>

@@ -12,24 +12,22 @@
 
 <div class="contenedor">
 
-
-    <form action="../config/login.php" method="post">
-
-    <div class="loginForm">
-
-    <h2>¡Bienvenido!</h2> 
-
-    <label for="">Ingresar usuario:</label>
-    <input type="text" name="username" class="controls" id="username">
-
-    <label for="">Ingresar Contraseña:</label>
-    <input type="text" name="contraseña" class="controls" id="contraseña">
-
-    <input type="submit" value="Ingresar" class="boton" name="login" id="login">
-    <p class="registro"><a href="registro.php">Clik aquí para registrarte</a></p>
-    
+<div class="contenedor">
+        <form action="../config/loginback.php" method="post">
+            <div>
+                <label for="username">Nombre de Usuario:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="pass" required>
+            </div>
+            <input type="submit" name="login" id="login" class="login" value="Iniciar sesión">
+        </form>
+        <?php if(isset($_GET['error'])) { ?>
+                <p style="color: red;"><?php echo $_GET['error']; ?></p>
+            <?php } ?>
     </div>
-    </form>
 
 <footer>
 
