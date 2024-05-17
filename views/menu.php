@@ -1,14 +1,4 @@
-<?php
-require '../config/connection.php';
-session_start();
 
-
-if (!isset($_SESSION['id_usuario'])) {
-    echo "<script>alert('Debes iniciar sesión para acceder a esta página');</script>";
-    header("refresh:1;url=login.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 

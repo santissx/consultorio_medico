@@ -1,54 +1,61 @@
 <?php
-require 'connection.php';
-session_start();
+// Incluir el archivo de conexión a la base de datos
+include_once "connection.php";
 
-// Verificar conexión
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
-}
+// Definir la función iniciar_sesion()
+function iniciar_sesion($username, $password, $conn) {
+    // Preparar la consulta SQL para seleccionar un usuario con el nombre de usuario y contraseña proporcionados
+    $consulta = "SELECT * FROM usuarios WHERE username = ? AND pass = ?";
+    $sentencia = $conn->prepare($consulta);
+    $sentencia->bind_param("ss", $username, $password);
 
-// Verificar si el usuario ya está autenticado, redirigir a la página de menú si es así
-if(isset($_SESSION['id_usuario'])) {
-    header("Location: ../views/menu.php");
-    exit;
-}
+    // Ejecutar la consulta
+    $sentencia->execute();
 
-// Verificar si se ha enviado el formulario de login
-if(isset($_POST["login"])) {
-    $username = $_POST['username'];
-    $password = $_POST['pass'];
+    // Obtener el resultado de la consulta
+    $resultado = $sentencia->get_result();
 
-    echo "Usuario ingresado: " . $username . "<br>";
-    echo "Contraseña ingresada: " . $password . "<br>";
-        
-    $sql = "SELECT id_usuario, username, pass FROM usuarios WHERE username = '$username'";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows == 1) {
-        // Usuario encontrado
-        $row = $result->fetch_assoc();
-        $contra_guardad = $row['pass'];
-        echo "Contraseña almacenada en la base de datos: " . $contra_guardada . "<br>";
-
-        if(password_verify($password, $contra_guardada)) {
-            // Iniciar sesión
-            $_SESSION['id_usuario'] = $row['id_usuario'];
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['pass'] = $row['pass'];
-            // Redirigir a la página de menú
-            header("Location: ../views/menu.php");
-            exit;
-        } else {
-            $error = "Contraseña incorrecta";
-            // Redirigir de vuelta a login.php con mensaje de error
-            header("Location: ../views/login.php?error=".urlencode($error));
-            exit;
-        }
+    // Verificar si se encontró un usuario con las credenciales proporcionadas
+    if ($resultado->num_rows == 1) {
+        // Devolver los datos del usuario encontrado
+        return $resultado->fetch_assoc();
     } else {
-        $error = "Usuario no encontrado";
-        // Redirigir de vuelta a login.php con mensaje de error
-        header("Location: ../views/login.php?error=".urlencode($error));
+        // Devolver false si no se encontró ningún usuario con las credenciales proporcionadas
+        return false;
+    }
+}
+
+// Obtener los datos del formulario de inicio de sesión
+$username = $_POST['username'];
+$passUsuario = $_POST['password'];
+
+if (!empty($username) && !empty($passUsuario)) {
+    // Intentar iniciar sesión con los datos proporcionados
+    $usuario = iniciar_sesion($username, $passUsuario, $conn);
+
+    if ($usuario) {
+        // Iniciar sesión exitosamente
+        if ($usuario['id_usuario'] == 0) {
+            $nombreUsuario = "Admin";
+        } else {
+            // Aquí puedes hacer lo que necesites con los datos del usuario
+        }
+
+        // Iniciar sesión del usuario
+        session_start();
+        $_SESSION['id_usuario'] = $usuario['id_usuario'];
+
+        // Redirigir al usuario al menú
+        header('Location:../views/menu.php?accion=ingresar');
+        exit;
+    } else {
+        // Si no existen usuarios con las credenciales proporcionadas, redirigir al usuario de vuelta al formulario de inicio de sesión con un mensaje de error
+        header('Location:../views/login.php?error=1');
         exit;
     }
+} else {
+    // Si el formulario está en blanco, redirigir al usuario de vuelta al formulario de inicio de sesión con un mensaje de error
+    header('Location:../views/login.php?error=2');
+    exit;
 }
 ?>
